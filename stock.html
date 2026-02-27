@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stock - Gráfica BLOQUEO vs PDS GIRADAS</title>
+    <style>
+        body{font-family:Calibri,Inter,sans-serif;margin:18px;color:#1f2937}
+        h1{font-size:18px;margin:0 0 12px}
+        #loader{display:flex;align-items:center;gap:10px}
+        .spinner{width:18px;height:18px;border:3px solid #e5e7eb;border-top-color:#2563eb;border-radius:50%;animation:spin 1s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        #chart-wrap{margin-top:18px;max-width:954px}
+        .chart-title{font-size:15px;font-weight:700;color:#1e293b;margin:0 0 8px;padding-left:4px}
+        .bars{display:flex;align-items:flex-end;gap:18px;padding:18px;border:1px solid #e6e7ec;background:#fff;border-radius:8px;flex-wrap:nowrap;overflow-x:auto;position:relative;padding-top:36px}
+        /* Horizontal breakdown chart */
+        #chart2-wrap{margin-top:24px;max-width:954px}
+        .hbar-container{padding:18px;border:1px solid #e6e7ec;background:#fff;border-radius:8px;position:relative;padding-top:36px}
+        .hbar-row{display:flex;align-items:center;margin-bottom:14px}
+        .hbar-row:last-child{margin-bottom:0}
+        .hbar-label{width:80px;font-size:13px;font-weight:700;color:#374151;flex-shrink:0;text-align:right;padding-right:10px}
+        .hbar-track{flex:1;display:flex;height:36px;border-radius:5px;overflow:hidden;background:#f1f5f9}
+        .hbar-seg{display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;white-space:nowrap;padding:0 6px;min-width:0}
+        .hbar-seg.lavada{background:#8b5cf6}
+        .hbar-seg.acabada{background:#14b8a6}
+        .hbar-total{width:80px;font-size:15px;font-weight:700;color:#0f172a;text-align:left;padding-left:8px;flex-shrink:0}
+        .legend2{display:flex;gap:14px;align-items:center;margin-top:10px}
+        .legend2 .legend-item{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:#374151}
+        .legend2 .legend-swatch{width:14px;height:14px;border-radius:3px;display:inline-block}
+        .legend-inside{position:absolute;top:8px;left:12px;display:flex;gap:12px;align-items:center;z-index:2}
+        .legend-inside .legend-item{display:inline-flex;gap:6px;align-items:center;font-size:12px;color:#374151}
+        .legend-inside .legend-swatch{width:12px;height:12px;border-radius:3px;display:inline-block}
+        .sw-lavada{background:#8b5cf6}
+        .sw-acabada{background:#14b8a6}
+        .bar-item{display:flex;flex-direction:column;align-items:center;flex:0 0 110px;min-width:90px}
+        .bar{width:100%;background:transparent;border-radius:6px 6px 0 0;display:flex;flex-direction:column;justify-content:flex-end;color:#fff;font-weight:700;overflow:hidden}
+        .segment{width:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px}
+        .seg-prog{background:#2563eb}
+        .seg-xprog{background:#fb923c}
+        .label{margin-top:8px;font-size:12px;text-align:center;color:#374151;font-weight:700}
+        .value{font-size:15px;color:#0f172a;margin-bottom:6px;font-weight:700}
+        #no-data{color:#6b7280}
+        .controls{display:flex;gap:8px;align-items:center}
+        .legend{display:flex;gap:12px;align-items:center;margin-left:12px}
+        .legend-item{display:inline-flex;gap:8px;align-items:center;font-size:13px;color:#374151}
+        .legend-swatch{width:14px;height:14px;border-radius:3px;display:inline-block}
+        .sw-prog{background:#2563eb}
+        .sw-xprog{background:#fb923c}
+        /* simple switch */
+        .switch{display:inline-flex;align-items:center;gap:8px;margin-left:8px}
+        .switch input[type="checkbox"]{width:40px;height:22px;appearance:none;background:#e5e7eb;border-radius:999px;position:relative;outline:none;cursor:pointer}
+        .switch input[type="checkbox"]:before{content:'';position:absolute;width:16px;height:16px;background:white;border-radius:50%;top:3px;left:4px;transition:transform 0.15s}
+        .switch input[type="checkbox"]:checked{background:#2563eb}
+        .switch input[type="checkbox"]:checked:before{transform:translateX(18px)}
+        .switch label{font-weight:600;color:#374151}
+        button{background:#2563eb;color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
+        button:disabled{opacity:0.6;cursor:not-allowed}
+        .btn-refresh-circle{display:none;width:36px;height:36px;border-radius:50%;background:#2563eb;color:#fff;border:none;cursor:pointer;padding:0;align-items:center;justify-content:center;flex-shrink:0;transition:transform 0.2s}
+        .btn-refresh-circle:hover{transform:rotate(90deg)}
+        .btn-refresh-circle svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+        .switch-active input[type="checkbox"]{background:#2563eb !important}
+        .switch-active input[type="checkbox"]:before{transform:translateX(18px) !important}
+        /* 2-column layout */
+        .main-columns{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+        .col-left{flex:0 0 auto;max-width:960px;min-width:600px}
+        .col-right{flex:1 1 400px;min-width:350px}
+        /* Chart 3 - Monthly dispatch */
+        #chart3-wrap{margin-top:0}
+        .chart3-container{padding:18px;border:1px solid #e6e7ec;background:#fff;border-radius:8px;position:relative;padding-top:36px;overflow-y:auto;max-height:700px}
+        .month-group{margin-bottom:18px;border-bottom:1px solid #f1f5f9;padding-bottom:14px}
+        .month-group:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+        .month-label{font-size:14px;font-weight:700;color:#0f172a;margin-bottom:8px}
+        .month-row{display:flex;align-items:center;margin-bottom:6px}
+        .month-row:last-child{margin-bottom:0}
+        .month-row-label{width:100px;font-size:12px;font-weight:700;color:#374151;flex-shrink:0;text-align:right;padding-right:10px}
+        .month-bar-track{flex:1;display:flex;height:26px;border-radius:4px;overflow:hidden;background:#f1f5f9}
+        .month-bar-seg{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;white-space:nowrap;padding:0 4px;min-width:0}
+        .month-bar-seg.m-prog{background:#2563eb}
+        .month-bar-seg.m-xprog{background:#fb923c}
+        .month-bar-total{width:70px;font-size:13px;font-weight:700;color:#0f172a;text-align:left;padding-left:6px;flex-shrink:0}
+    </style>
+</head>
+<body>
+    <div class="header-row" style="display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap">
+        <h1 style="margin:0">STOCK</h1>
+        <div id="loader" style="display:flex;align-items:center;gap:8px"><div class="spinner"></div><span style="font-size:13px">Cargando...</span></div>
+        <button id="btn-refresh" class="btn-refresh-circle" onclick="reloadData()" title="Refrescar datos">
+            <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.63-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
+        </button>
+        <div class="switch switch-active" title="Ver Prendas">
+            <input id="chk-pds" type="checkbox" checked onchange="toggleUnit('pds')">
+            <label for="chk-pds">Prendas</label>
+        </div>
+        <div class="switch" title="Ver KG">
+            <input id="chk-kg" type="checkbox" onchange="toggleUnit('kg')">
+            <label for="chk-kg">kg</label>
+        </div>
+        <a href="tabla_dinamica.html" style="margin-left:auto"><button type="button">Tabla dinámica</button></a>
+        <a href="index.html" aria-label="volver a inicio"><button id="btn-volver" type="button">volver</button></a>
+    </div>
+
+    <div class="main-columns">
+    <div class="col-left">
+    <div id="chart-wrap">
+        <div id="chart-title" class="chart-title">Stock de prendas Corte/Habilitado</div>
+        <div id="no-data" style="display:none">No hay datos que cumplan el filtro.</div>
+        <div id="chart" class="bars" aria-live="polite">
+            <div class="legend-inside" id="legend">
+                <div class="legend-item"><span class="legend-swatch sw-prog" aria-hidden="true"></span><span>PROG</span></div>
+                <div class="legend-item"><span class="legend-swatch sw-xprog" aria-hidden="true"></span><span>X PROG</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="chart2-wrap">
+        <div id="chart2-title" class="chart-title" style="margin-top:8px">Desglose CORTE PZAS por Ruta Tela (Prendas)</div>
+        <div id="chart2" class="hbar-container" aria-live="polite">
+            <div class="legend-inside">
+                <div class="legend-item"><span class="legend-swatch sw-lavada" aria-hidden="true"></span><span>LAVADA</span></div>
+                <div class="legend-item"><span class="legend-swatch sw-acabada" aria-hidden="true"></span><span>ACABADA</span></div>
+            </div>
+        </div>
+    </div>
+    </div><!-- col-left -->
+    <div class="col-right">
+    <div id="chart3-wrap">
+        <div id="chart3-title" class="chart-title">Stock por Mes de Despacho (Prendas)</div>
+        <div id="chart3" class="chart3-container" aria-live="polite">
+            <div class="legend-inside">
+                <div class="legend-item"><span class="legend-swatch sw-prog" aria-hidden="true"></span><span>PROG</span></div>
+                <div class="legend-item"><span class="legend-swatch sw-xprog" aria-hidden="true"></span><span>X PROG</span></div>
+            </div>
+        </div>
+    </div>
+    </div><!-- col-right -->
+    </div><!-- main-columns -->
+
+<script>
+// Copiamos la configuración del proyecto (usar la misma web app y sheet id que en index.html)
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxuCzW770E6oZd9gt6tVdFiNgOPFCdRO-N3lC-Vg-fSZjXupolsMlyaQOWlP0qlcBULAw/exec";
+const SHEET_ID = "18cQuwqerdMggAeJ8TCUKA7-gujXsA91-CRMUTNpr8aQ";
+
+let rawData = [];
+let useKg = false; // false => use PDS GIRADAS, true => use KG GIRADOS
+
+function reloadData(){
+    document.getElementById('btn-refresh').style.display='none';
+    document.getElementById('loader').style.display='flex';
+    clearChartKeepLegend('chart');
+    if(document.getElementById('chart3')) clearChartKeepLegend('chart3');
+    document.getElementById('no-data').style.display='none';
+    // Insert gviz script
+    const scr = document.createElement('script');
+    scr.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:loadStockData&gid=0`;
+    scr.onerror = () => showError('Error cargando Google Sheets');
+    document.body.appendChild(scr);
+}
+
+window.loadStockData = function(jsonResponse){
+    try{
+        if(!jsonResponse || !jsonResponse.table) throw new Error('Respuesta inválida');
+        const rowsRaw = jsonResponse.table.rows.map(r => r.c.map(cell => (cell && cell.v !== null) ? cell.v : ""));
+        const gvizHeaders = jsonResponse.table.cols.map(col => col.label || col.id);
+
+        // Si el gvizHeaders contiene el nombre de la cabecera principal la usamos, sino buscamos fila con encabezados
+        if (gvizHeaders.includes("PDS GIRADAS")) {
+            rawData = [gvizHeaders, ...rowsRaw];
+        } else {
+            // buscar fila que tenga PDS GIRADAS
+            let headerRowIndex = -1;
+            for(let i=0;i<rowsRaw.length;i++){
+                if (rowsRaw[i].some(c => String(c).toUpperCase().trim() === 'PDS GIRADAS')){ headerRowIndex = i; break; }
+            }
+            if (headerRowIndex !== -1) rawData = rowsRaw.slice(headerRowIndex);
+            else rawData = [gvizHeaders, ...rowsRaw];
+        }
+
+        // normalize headers
+        if(rawData.length>0) rawData[0] = rawData[0].map(h=> h ? String(h).trim() : '');
+
+        processAndRender();
+    }catch(err){
+        showError(err.message || err);
+    }
+};
+
+function showError(msg){
+    document.getElementById('loader').style.display='none';
+    document.getElementById('btn-refresh').style.display='inline-flex';
+    document.getElementById('no-data').style.display='block';
+    document.getElementById('no-data').innerText = 'Error: ' + msg;
+}
+
+function getColIndexFlexible(names){
+    if(!rawData || rawData.length===0) return -1;
+    const headers = rawData[0];
+    for(const name of names){
+        const target = name.toLowerCase().trim();
+        const idx = headers.findIndex(h=> String(h || '').toLowerCase().trim() === target);
+        if(idx !== -1) return idx;
+    }
+    return -1;
+}
+
+function getVal(row, idx){
+    if(!row) return '';
+    if(idx<0 || idx>=row.length) return '';
+    return row[idx];
+}
+
+function processAndRender(){
+    // columnas de interés (variantes posibles)
+    const idxRuta = getColIndexFlexible(['RUTA TELA','RUTA','RUTA_TELA','RUTA TELA ']);
+    const idxEstadoBloq = getColIndexFlexible(['estado_bloqueo','ESTADO_BLOQUEO','BLOQUEO','BLOQUEO_ESTADO','ESTADO BLOQUEO']);
+    const idxPds = getColIndexFlexible(['PDS GIRADAS','PDS_GIRADAS','PDS','PDS GIRADAS ']);
+    const idxKg = getColIndexFlexible(['KG GIRADOS','KG_GIRADOS','KG GIRADOS ']);
+
+    const idxValue = useKg ? idxKg : idxPds;
+
+    if(idxValue === -1){
+        showError(useKg ? 'No se encontró la columna "KG GIRADOS"' : 'No se encontró la columna "PDS GIRADAS"');
+        return;
+    }
+    if(idxRuta === -1){ showError('No se encontró la columna "RUTA TELA"'); return; }
+    if(idxEstadoBloq === -1){ showError('No se encontró la columna "estado_bloqueo / BLOQUEO"'); return; }
+
+    // Calculamos dos series para BLOQUEO: PROG (estado que contiene 'PROG') y X PROG (filas sin valor -> X PROG)
+    let sumPROG = 0;
+    let sumXPROG = 0;
+
+    // Además calculamos LAVANDERIA: filas con estado_bloqueo = 'OK' y estado_lavada != 'OK'
+    let sumLavPROG = 0;
+
+    // Calculamos CORTE PZAS: filas con RUTA = ACABADA OR (LAVADA y estado_lavada = OK)
+    // y las clasificamos por estado_corte en PROG (PROG 1T/2T/3T) o X PROG (no OK ni PROGs)
+    let sumCortePROG = 0;
+    let sumCorteXPROG = 0;
+
+    // Desglose CORTE PZAS por RUTA TELA
+    let cortePROG_lavada = 0;
+    let cortePROG_acabada = 0;
+    let corteXPROG_lavada = 0;
+    let corteXPROG_acabada = 0;
+    
+    // Calculamos CORTE BLOQ: estado_corte = OK AND estado_bloques = 'Ok corte' AND estado_corte_bloques != OK
+    // Clasificamos PROG cuando estado_corte_bloques == 'PROG', X PROG otherwise
+    let sumCorteBloqPROG = 0;
+    let sumCorteBloqXPROG = 0;
+
+        // ENUMERADO (Por enumerar): misma logica de la vista Enumerado > Por enumerar
+        // estado_corte = 'OK' y estado_enumerado distinto de:
+        // 'OK ENM', 'OK S/ENM', 'OK PAQUETEO' (y variante 'OK PAQUETO')
+        let sumEnumeradoPROG = 0;
+
+    // TRANSFER:
+    // - considerar solo estado_enumerado = OK ENM / OK S/ENM / OK PAQUETEO
+    // - NO considerar estado_habilitado = OK / OK S/DESTINO
+    // - en Prendas: valor = n.transfxpda * PDS GIRADAS
+    // - en Kg: valor = KG GIRADOS (sin multiplicar por n.transfxpda)
+    // - si n.transfxpda vacio, no numerico o 'NO LLEVA', aporta 0
+    // Se muestra solo PROG (X PROG = 0)
+    let sumTransferPROG = 0;
+
+    // HABILITADO: filas con estado_enumerado = 'OK ENM'|'OK S/ENM'|'OK PAQUETEO'
+    // y estado_habilitado distinto de 'OK' y 'OK S/DESTINO'
+    let sumHabPROG = 0;
+    let sumHabXPROG = 0;
+
+    // índices auxiliares
+    const idxEstadoLav = getColIndexFlexible(['estado_lavada','ESTADO_LAVADA','estado_lavado','ESTADO_LAVADO']);
+    const idxEstadoCorte = getColIndexFlexible(['estado_corte','STATUS_CORTE','STATUS','ESTADO CORTE','ESTADO_CORTE','estado corte']);
+    const idxEstadoBloques = getColIndexFlexible(['estado_bloques','ESTADO_BLOQUES','ESTADO BLOQUES','ESTADO_BLOQUES']);
+    const idxEstadoCorteBloques = getColIndexFlexible(['estado_corte_bloques','ESTADO_CORTE_BLOQUES','estado_corte_bloques','estado corte bloques']);
+    const idxEstadoEnumerado = getColIndexFlexible(['estado_enumerado','ESTADO_ENUMERADO','estado enumerado']);
+    const idxNTransfxpda = getColIndexFlexible(['n.transfxpda','N.TRANSFXPDA','n_transfxpda','N_TRANSFXPDA']);
+    const idxEstadoHabilitado = getColIndexFlexible(['estado_habilitado','ESTADO_HABILITADO','estado habilitado']);
+    const idxFDespacho = getColIndexFlexible(['F. DESPACHO','F.DESPACHO','FDESPACHO','F DESPACHO','F. DESPACHO ']);
+
+    // Monthly data by F. DESPACHO: { 'YYYY-MM': { bloqueo:{prog,xprog}, corte:{prog,xprog}, hab:{prog,xprog} } }
+    const monthlyData = {};
+
+    for(let i=1;i<rawData.length;i++){
+        const row = rawData[i];
+        const rutaVal = String(getVal(row, idxRuta) || '').toUpperCase().trim();
+
+        // valor según el switch (PDS o KG)
+        let valRaw = getVal(row, idxValue);
+        let val = 0;
+        if (valRaw === null || valRaw === undefined || String(valRaw).trim() === '') val = 0;
+        else val = Number(String(valRaw).toString().replace(/,/g, '')) || 0;
+
+        // BLOQUEO: requiere RUTA = LAVADA y estado_bloqueo != OK
+        if(rutaVal === 'LAVADA'){
+            let estadoBloqVal = (getVal(row, idxEstadoBloq) || '').toString().trim();
+            const estadoBloqUpper = String(estadoBloqVal).toUpperCase().trim();
+            if(estadoBloqUpper !== 'OK'){
+                if(estadoBloqUpper.indexOf('PROG') !== -1) {
+                    sumPROG += val;
+                } else if(estadoBloqVal === '' ) {
+                    // filas sin valor -> considerarlas X PROG
+                    sumXPROG += val;
+                } else {
+                    // otras etiquetas (no PROG ni vacío) las sumamos a PROG
+                    sumPROG += val;
+                }
+            }
+        }
+
+        // LAVANDERIA: estado_bloqueo == OK y estado_lavada != OK
+        let estadoBloqVal2 = (getVal(row, idxEstadoBloq) || '').toString().trim();
+        const estadoBloqUpper2 = String(estadoBloqVal2).toUpperCase().trim();
+        const estadoLavVal = (idxEstadoLav !== -1) ? String(getVal(row, idxEstadoLav) || '').toUpperCase().trim() : '';
+        if(estadoBloqUpper2 === 'OK' && estadoLavVal !== 'OK'){
+            // según requerimiento, esta suma entra en la misma categoría PROG
+            sumLavPROG += val;
+        }
+
+        // CORTE PZAS: RUTA = ACABADA OR (LAVADA y estado_lavada = OK)
+        const includeCorte = (rutaVal === 'ACABADA') || (rutaVal === 'LAVADA' && estadoLavVal === 'OK');
+        if(includeCorte){
+            const estadoCorteVal = (idxEstadoCorte !== -1) ? String(getVal(row, idxEstadoCorte) || '').toUpperCase().trim() : '';
+            // PROG: exact matches 'PROG 1T','PROG 2T','PROG 3T'
+            if(estadoCorteVal === 'PROG 1T' || estadoCorteVal === 'PROG 2T' || estadoCorteVal === 'PROG 3T'){
+                sumCortePROG += val;
+                if(rutaVal === 'LAVADA') cortePROG_lavada += val;
+                else if(rutaVal === 'ACABADA') cortePROG_acabada += val;
+            } else if(estadoCorteVal !== 'OK'){
+                // X PROG: diferente a OK y a los PROG definidos
+                sumCorteXPROG += val;
+                if(rutaVal === 'LAVADA') corteXPROG_lavada += val;
+                else if(rutaVal === 'ACABADA') corteXPROG_acabada += val;
+            }
+        }
+
+        // CORTE BLOQ: filas con estado_corte = 'OK' and estado_bloques = 'Ok corte' and estado_corte_bloques != 'OK'
+        const estadoCorteRow = (idxEstadoCorte !== -1) ? String(getVal(row, idxEstadoCorte) || '').toUpperCase().trim() : '';
+        const estadoBloquesRow = (idxEstadoBloques !== -1) ? String(getVal(row, idxEstadoBloques) || '').toUpperCase().trim() : '';
+        const estadoCorteBloquesRow = (idxEstadoCorteBloques !== -1) ? String(getVal(row, idxEstadoCorteBloques) || '').toUpperCase().trim() : '';
+
+            // Enumerado > Por enumerar (misma logica de index/CORTE_index):
+            // estado_corte = OK y estado_enumerado != OK ENM/OK S/ENM/OK PAQUETEO
+            const estadoEnumeradoRow = (idxEstadoEnumerado !== -1) ? String(getVal(row, idxEstadoEnumerado) || '').toUpperCase().trim() : '';
+            if(
+                estadoCorteRow === 'OK' &&
+                estadoEnumeradoRow !== 'OK ENM' &&
+                estadoEnumeradoRow !== 'OK S/ENM' &&
+                estadoEnumeradoRow !== 'OK PAQUETEO' &&
+                estadoEnumeradoRow !== 'OK PAQUETO'
+            ){
+                sumEnumeradoPROG += val;
+            }
+
+            // TRANSFER: considerar solo estados permitidos en Enumerado y excluir habilitado OK/S-DESTINO
+            const estadoHabTransferRow = (idxEstadoHabilitado !== -1) ? String(getVal(row, idxEstadoHabilitado) || '').toUpperCase().trim() : '';
+            const includeByEnumerado =
+                estadoEnumeradoRow === 'OK ENM' ||
+                estadoEnumeradoRow === 'OK S/ENM' ||
+                estadoEnumeradoRow === 'OK PAQUETEO' ||
+                estadoEnumeradoRow === 'OK PAQUETO';
+            const excludeByHabilitado =
+                estadoHabTransferRow === 'OK' ||
+                estadoHabTransferRow === 'OK S/DESTINO';
+            if(includeByEnumerado && !excludeByHabilitado){
+                const rawNTransf = (idxNTransfxpda !== -1) ? getVal(row, idxNTransfxpda) : '';
+                const nTransfTxt = String(rawNTransf || '').toUpperCase().trim();
+                let transferVal = 0;
+                if(nTransfTxt !== '' && nTransfTxt !== 'NO LLEVA'){
+                    if(useKg){
+                        // En Kg no se multiplica por n.transfxpda
+                        transferVal = val;
+                    } else {
+                        let nTransfNum = Number(String(rawNTransf).replace(/,/g, '').trim());
+                        if(!Number.isFinite(nTransfNum)) nTransfNum = 0;
+                        transferVal = nTransfNum * val;
+                    }
+                }
+                sumTransferPROG += transferVal;
+            }
+
+        if(estadoCorteRow === 'OK' && estadoBloquesRow === 'OK CORTE' && estadoCorteBloquesRow !== 'OK'){
+            if(estadoCorteBloquesRow === 'PROG') sumCorteBloqPROG += val;
+            else sumCorteBloqXPROG += val;
+        }
+
+        // HABILITADO: estado_enumerado IN ('OK ENM','OK S/ENM','OK PAQUETEO')
+        // y estado_habilitado != 'OK' y != 'OK S/DESTINO'
+        const estadoHabRow = (idxEstadoHabilitado !== -1) ? String(getVal(row, idxEstadoHabilitado) || '').toUpperCase().trim() : '';
+        if(estadoEnumeradoRow === 'OK ENM' || estadoEnumeradoRow === 'OK S/ENM' || estadoEnumeradoRow === 'OK PAQUETEO' || estadoEnumeradoRow === 'OK PAQUETO'){
+            if(estadoHabRow !== 'OK' && estadoHabRow !== 'OK S/DESTINO'){
+                if(estadoHabRow === 'PROG 1T' || estadoHabRow === 'PROG 2T' || estadoHabRow === 'PROG 3T'){
+                    sumHabPROG += val;
+                } else {
+                    // vacío, 'X PROG', u otro → X PROG
+                    sumHabXPROG += val;
+                }
+            }
+        }
+
+        // ── Monthly F. DESPACHO tracking for chart3 ──
+        if(idxFDespacho !== -1){
+            const rawDespacho = getVal(row, idxFDespacho);
+            const mKey = parseMonthKey(rawDespacho) || 'SIN-FECHA';
+            {
+                if(!monthlyData[mKey]) monthlyData[mKey] = {
+                    bloqueo:{prog:0,xprog:0}, corte:{prog:0,xprog:0}, hab:{prog:0,xprog:0}
+                };
+                const md = monthlyData[mKey];
+                // BLOQUEO
+                if(rutaVal === 'LAVADA' && estadoBloqUpper2 !== 'OK'){
+                    if(estadoBloqVal2 === '') md.bloqueo.xprog += val;
+                    else md.bloqueo.prog += val;
+                }
+                // CORTE PZAS
+                const inclCorteM = (rutaVal === 'ACABADA') || (rutaVal === 'LAVADA' && estadoLavVal === 'OK');
+                if(inclCorteM){
+                    if(estadoCorteRow === 'PROG 1T' || estadoCorteRow === 'PROG 2T' || estadoCorteRow === 'PROG 3T'){
+                        md.corte.prog += val;
+                    } else if(estadoCorteRow !== 'OK'){
+                        md.corte.xprog += val;
+                    }
+                }
+                // HABILITADO
+                if(estadoEnumeradoRow === 'OK ENM' || estadoEnumeradoRow === 'OK S/ENM' || estadoEnumeradoRow === 'OK PAQUETEO' || estadoEnumeradoRow === 'OK PAQUETO'){
+                    if(estadoHabRow !== 'OK' && estadoHabRow !== 'OK S/DESTINO'){
+                        if(estadoHabRow === 'PROG 1T' || estadoHabRow === 'PROG 2T' || estadoHabRow === 'PROG 3T'){
+                            md.hab.prog += val;
+                        } else {
+                            md.hab.xprog += val;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Renderizar varias barras: BLOQUEO, LAVANDERIA y CORTE PZAS
+    renderMultipleBars([
+        { label: 'BLOQUEO', prog: sumPROG, xprog: sumXPROG },
+        { label: 'LAVANDERIA', prog: sumLavPROG, xprog: 0 },
+        { label: 'CORTE PZAS', prog: sumCortePROG, xprog: sumCorteXPROG },
+        { label: 'CORTE BLOQ', prog: sumCorteBloqPROG, xprog: sumCorteBloqXPROG },
+        { label: 'ENUMERADO', prog: sumEnumeradoPROG, xprog: 0 },
+        { label: 'TRANSFER', prog: sumTransferPROG, xprog: 0 },
+        { label: 'HABILITADO', prog: sumHabPROG, xprog: sumHabXPROG }
+    ]);
+
+    // Renderizar gráfico horizontal de desglose CORTE PZAS
+    renderCorteBreakdown({
+        prog:  { lavada: cortePROG_lavada,  acabada: cortePROG_acabada  },
+        xprog: { lavada: corteXPROG_lavada, acabada: corteXPROG_acabada }
+    });
+
+    // Renderizar gráfico mensual por F. DESPACHO
+    renderMonthlyChart(monthlyData);
+}
+
+function renderChartFromAgg(agg){
+    document.getElementById('loader').style.display='none';
+    document.getElementById('btn-refresh').style.display='inline-flex';
+    const chart = document.getElementById('chart');
+    chart.innerHTML = '';
+
+    const entries = Object.entries(agg).filter(([_k,v])=> v>0);
+    if(entries.length === 0){
+        document.getElementById('no-data').style.display='block';
+        document.getElementById('no-data').innerText = 'No hay filas con RUTA TELA = "LAVADA" y estado_bloqueo distinto de "OK".';
+        return;
+    }
+
+    // ordenar por valor descendente
+    entries.sort((a,b)=> b[1] - a[1]);
+    const max = entries[0][1];
+
+    // crear barras
+    for(const [key, value] of entries){
+        const item = document.createElement('div');
+        item.className = 'bar-item';
+
+        const valEl = document.createElement('div');
+        valEl.className = 'value';
+        valEl.innerText = formatNumber(value);
+
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        // altura relativa (máx 240px)
+        const height = Math.round((value / max) * 220) || 2;
+        bar.style.height = height + 'px';
+        bar.title = key + ': ' + value;
+        bar.innerText = value >= (max*0.12) ? formatNumber(value) : '';
+
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.innerText = key;
+
+        item.appendChild(valEl);
+        item.appendChild(bar);
+        item.appendChild(label);
+        chart.appendChild(item);
+    }
+}
+
+function renderMultipleBars(bars){
+    document.getElementById('loader').style.display='none';
+    document.getElementById('btn-refresh').style.display='inline-flex';
+    const chart = document.getElementById('chart');
+    clearChartKeepLegend('chart');
+
+    // calcular totales y max para escalar alturas
+    const totals = bars.map(b => (b.prog || 0) + (b.xprog || 0));
+    const maxTotal = Math.max(...totals, 0);
+    if(maxTotal === 0){
+        document.getElementById('no-data').style.display='block';
+        document.getElementById('no-data').innerText = 'No hay datos para mostrar.';
+        return;
+    }
+
+    const maxHeight = 220;
+
+    bars.forEach((b, idx) => {
+        const total = (b.prog || 0) + (b.xprog || 0);
+        const item = document.createElement('div');
+        item.className = 'bar-item';
+
+        const valEl = document.createElement('div');
+        valEl.className = 'value';
+        valEl.innerText = formatNumber(total);
+
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        const height = Math.max(2, Math.round((total / maxTotal) * maxHeight));
+        bar.style.height = height + 'px';
+        bar.title = `${b.label} — PROG: ${b.prog || 0} | X PROG: ${b.xprog || 0}`;
+
+        // X PROG on top
+        if(b.xprog && b.xprog > 0){
+            const h = Math.max(2, Math.round((b.xprog / total) * height));
+            const segTop = document.createElement('div');
+            segTop.className = 'segment seg-xprog';
+            segTop.style.height = h + 'px';
+            segTop.innerText = (b.xprog >= (maxTotal*0.03)) ? formatNumber(b.xprog) : '';
+            bar.appendChild(segTop);
+        }
+
+        if(b.prog && b.prog > 0){
+            const hProg = Math.max(2, Math.round((b.prog / total) * height));
+            const segBot = document.createElement('div');
+            segBot.className = 'segment seg-prog';
+            segBot.style.height = hProg + 'px';
+            segBot.innerText = formatNumber(b.prog);
+            bar.appendChild(segBot);
+        }
+
+        const label = document.createElement('div');
+        label.className = 'label';
+        label.innerText = b.label;
+
+        item.appendChild(valEl);
+        item.appendChild(bar);
+        item.appendChild(label);
+        chart.appendChild(item);
+    });
+}
+
+function renderCorteBreakdown(data){
+    const chart2 = document.getElementById('chart2');
+    clearChartKeepLegend('chart2');
+
+    const rows = [
+        { label: 'PROG',   lavada: data.prog.lavada,   acabada: data.prog.acabada   },
+        { label: 'X PROG', lavada: data.xprog.lavada,   acabada: data.xprog.acabada  }
+    ];
+
+    const maxVal = Math.max(...rows.map(r => r.lavada + r.acabada), 1);
+
+    rows.forEach(r => {
+        const total = r.lavada + r.acabada;
+        const pctLav  = total > 0 ? ((r.lavada  / total) * 100).toFixed(1) : '0.0';
+        const pctAcab = total > 0 ? ((r.acabada / total) * 100).toFixed(1) : '0.0';
+
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'hbar-row';
+
+        // Label
+        const lbl = document.createElement('div');
+        lbl.className = 'hbar-label';
+        lbl.innerText = r.label;
+        rowDiv.appendChild(lbl);
+
+        // Track
+        const track = document.createElement('div');
+        track.className = 'hbar-track';
+        const widthPct = total > 0 ? Math.max(4, (total / maxVal) * 100) : 0;
+        track.style.width = widthPct + '%';
+
+        if(r.lavada > 0){
+            const seg = document.createElement('div');
+            seg.className = 'hbar-seg lavada';
+            seg.style.flex = r.lavada;
+            seg.innerText = formatNumber(r.lavada) + ' [' + pctLav + '%]';
+            seg.title = 'LAVADA: ' + formatNumber(r.lavada);
+            track.appendChild(seg);
+        }
+        if(r.acabada > 0){
+            const seg = document.createElement('div');
+            seg.className = 'hbar-seg acabada';
+            seg.style.flex = r.acabada;
+            seg.innerText = formatNumber(r.acabada) + ' [' + pctAcab + '%]';
+            seg.title = 'ACABADA: ' + formatNumber(r.acabada);
+            track.appendChild(seg);
+        }
+
+        rowDiv.appendChild(track);
+
+        // Total
+        const tot = document.createElement('div');
+        tot.className = 'hbar-total';
+        tot.innerText = formatNumber(total);
+        rowDiv.appendChild(tot);
+
+        chart2.appendChild(rowDiv);
+    });
+}
+
+function parseMonthKey(val){
+    if(val === null || val === undefined || val === '') return null;
+    let d = null;
+
+    // 1) Ya es un Date object (gviz JSONP puede devolver Date objects reales)
+    if(val instanceof Date && !isNaN(val.getTime())){
+        d = val;
+    }
+
+    // 2) Número serial de Excel (> 30000) — igual que index.html
+    if(!d && typeof val === 'number' && val > 30000){
+        d = new Date(Math.round((val - 25569) * 86400 * 1000));
+    }
+
+    // 3) String "Date(year,month,day)" de gviz (month es 0-based)
+    if(!d && typeof val === 'string'){
+        const gm = val.match(/Date\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if(gm){
+            d = new Date(parseInt(gm[1]), parseInt(gm[2]), parseInt(gm[3]));
+        }
+    }
+
+    // 4) String "DD/Mon/YY" o "DD/Mon/YYYY" o "DD/MM/YYYY"
+    if(!d && typeof val === 'string'){
+        const s = val.trim();
+        const parts = s.split('/');
+        if(parts.length === 3){
+            const meses = {ene:0,feb:1,mar:2,abr:3,may:4,jun:5,jul:6,ago:7,sep:8,oct:9,nov:10,dic:11};
+            const mp = parts[1].toLowerCase().trim();
+            let year = parseInt(parts[2]);
+            if(!isNaN(year) && year < 100) year += 2000; // Fix año de 2 dígitos: 26 → 2026
+            const day = parseInt(parts[0]);
+            if(!isNaN(year) && !isNaN(day)){
+                if(meses[mp] !== undefined){
+                    d = new Date(year, meses[mp], day);
+                } else {
+                    const mn = parseInt(parts[1]);
+                    if(mn >= 1 && mn <= 12) d = new Date(year, mn - 1, day);
+                }
+            }
+        }
+    }
+
+    if(!d || isNaN(d.getTime())) return null;
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+}
+
+function monthKeyToLabel(key){
+    if(key === 'SIN-FECHA') return 'Sin F.Despacho';
+    const names = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const [y,m] = key.split('-');
+    return names[parseInt(m)-1] + '/' + y;
+}
+
+function renderMonthlyChart(monthlyData){
+    const chart3 = document.getElementById('chart3');
+    if(!chart3) return;
+    clearChartKeepLegend('chart3');
+
+    const keys = Object.keys(monthlyData).sort((a,b) => {
+        if(a === 'SIN-FECHA') return 1;
+        if(b === 'SIN-FECHA') return -1;
+        return a.localeCompare(b);
+    });
+    if(keys.length === 0) return;
+
+    // Max value for scaling
+    let maxVal = 0;
+    keys.forEach(k => {
+        const d = monthlyData[k];
+        ['bloqueo','corte','hab'].forEach(cat => {
+            const t = d[cat].prog + d[cat].xprog;
+            if(t > maxVal) maxVal = t;
+        });
+    });
+    if(maxVal === 0) return;
+
+    keys.forEach(k => {
+        const d = monthlyData[k];
+        const group = document.createElement('div');
+        group.className = 'month-group';
+
+        const label = document.createElement('div');
+        label.className = 'month-label';
+        label.innerText = monthKeyToLabel(k);
+        group.appendChild(label);
+
+        const categories = [
+            { label: 'BLOQUEO',    data: d.bloqueo },
+            { label: 'CORTE PZAS', data: d.corte },
+            { label: 'HABILITADO', data: d.hab }
+        ];
+
+        categories.forEach(cat => {
+            const total = cat.data.prog + cat.data.xprog;
+            if(total === 0) return; // skip empty bars
+            const row = document.createElement('div');
+            row.className = 'month-row';
+
+            const lbl = document.createElement('div');
+            lbl.className = 'month-row-label';
+            lbl.innerText = cat.label;
+            row.appendChild(lbl);
+
+            const track = document.createElement('div');
+            track.className = 'month-bar-track';
+            track.style.width = Math.max(3, (total / maxVal) * 100) + '%';
+
+            if(cat.data.prog > 0){
+                const seg = document.createElement('div');
+                seg.className = 'month-bar-seg m-prog';
+                seg.style.flex = cat.data.prog;
+                seg.innerText = total > maxVal * 0.04 ? formatNumber(cat.data.prog) : '';
+                seg.title = 'PROG: ' + formatNumber(cat.data.prog);
+                track.appendChild(seg);
+            }
+            if(cat.data.xprog > 0){
+                const seg = document.createElement('div');
+                seg.className = 'month-bar-seg m-xprog';
+                seg.style.flex = cat.data.xprog;
+                seg.innerText = total > maxVal * 0.04 ? formatNumber(cat.data.xprog) : '';
+                seg.title = 'X PROG: ' + formatNumber(cat.data.xprog);
+                track.appendChild(seg);
+            }
+
+            row.appendChild(track);
+
+            const tot = document.createElement('div');
+            tot.className = 'month-bar-total';
+            tot.innerText = formatNumber(total);
+            row.appendChild(tot);
+
+            group.appendChild(row);
+        });
+
+        chart3.appendChild(group);
+    });
+}
+
+function toggleUnit(unit){
+    const chkPds = document.getElementById('chk-pds');
+    const chkKg = document.getElementById('chk-kg');
+    if(unit === 'kg'){
+        useKg = true;
+        chkKg.checked = true;
+        chkPds.checked = false;
+        chkKg.parentElement.classList.add('switch-active');
+        chkPds.parentElement.classList.remove('switch-active');
+    } else {
+        useKg = false;
+        chkPds.checked = true;
+        chkKg.checked = false;
+        chkPds.parentElement.classList.add('switch-active');
+        chkKg.parentElement.classList.remove('switch-active');
+    }
+    // Actualizar título del gráfico
+    updateChartTitle();
+    // si ya cargamos datos, re-renderizamos inmediatamente
+    if(rawData && rawData.length>1){
+        document.getElementById('no-data').style.display='none';
+        processAndRender();
+    } else {
+        document.getElementById('btn-refresh').style.display='inline-flex';
+    }
+}
+
+function updateChartTitle(){
+    const titleEl = document.getElementById('chart-title');
+    if(titleEl){
+        titleEl.innerText = useKg
+            ? 'Stock de Kilogramos Corte/Habilitado'
+            : 'Stock de prendas Corte/Habilitado';
+    }
+    const title2El = document.getElementById('chart2-title');
+    if(title2El){
+        title2El.innerText = useKg
+            ? 'Desglose CORTE PZAS por Ruta Tela (Kilogramos)'
+            : 'Desglose CORTE PZAS por Ruta Tela (Prendas)';
+    }
+    const title3El = document.getElementById('chart3-title');
+    if(title3El){
+        title3El.innerText = useKg
+            ? 'Stock por Mes de Despacho (Kilogramos)'
+            : 'Stock por Mes de Despacho (Prendas)';
+    }
+}
+
+function formatNumber(n){
+    // entero => separador de miles con coma; decimal => 2 dec con separador de miles
+    if(Number.isInteger(n)) return n.toLocaleString('en-US');
+    return n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function clearChartKeepLegend(id){
+    const el = document.getElementById(id);
+    const children = Array.from(el.children);
+    children.forEach(child => {
+        if(!child.classList.contains('legend-inside')) el.removeChild(child);
+    });
+}
+
+// Inicializar carga
+reloadData();
+</script>
+</body>
+</html>
+
