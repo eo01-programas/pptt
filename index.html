@@ -718,6 +718,141 @@
     }
     </style>
     <style>
+        /* Responsive tablet 10" (NOVAT): vista compacta para evitar recortes y scroll lateral en tabs */
+        @media screen and (max-height: 860px), screen and (max-width: 1180px) {
+            body {
+                font-size: 12px;
+            }
+            header {
+                height: 54px;
+                padding: 0 10px;
+                display: grid;
+                grid-template-columns: minmax(0, 34%) minmax(0, 66%);
+                column-gap: 8px;
+                overflow: hidden;
+            }
+            .brand {
+                min-width: 0;
+                gap: 5px;
+                font-size: 14px;
+                white-space: nowrap;
+                overflow: hidden;
+            }
+            .search-oc-pill {
+                margin-left: 8px;
+                padding: 3px 8px;
+                border-radius: 16px;
+                max-width: 180px;
+                min-width: 0;
+            }
+            .search-oc-label {
+                font-size: 10px;
+            }
+            .search-oc-input {
+                width: 72px;
+                font-size: 11px;
+            }
+            .search-filter-clear-btn {
+                width: 26px;
+                height: 26px;
+                margin-left: 4px;
+            }
+            .search-filter-clear-btn i {
+                font-size: 12px;
+            }
+            .nav-tabs {
+                min-width: 0;
+                display: grid;
+                grid-template-columns: repeat(7, minmax(0, 1fr));
+                gap: 2px;
+                height: 100%;
+                align-items: stretch;
+            }
+            .nav-tab {
+                min-width: 0;
+                padding: 0 2px;
+                gap: 3px;
+                justify-content: center;
+                font-size: 10.5px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .nav-tab i {
+                display: none;
+            }
+            .nav-tab .badge {
+                font-size: 9px;
+                padding: 0 4px;
+                border-radius: 8px;
+                flex-shrink: 0;
+            }
+            main {
+                padding: 8px;
+            }
+            .sub-nav {
+                margin-bottom: 8px;
+                padding: 2px;
+                gap: 2px;
+            }
+            .sub-tab {
+                padding: 4px 8px;
+                font-size: 12px;
+                gap: 4px;
+            }
+            .kg-badge {
+                font-size: 10px;
+                padding: 1px 4px;
+            }
+            table {
+                min-width: 980px;
+                font-size: 11px;
+            }
+            thead th {
+                font-size: 12px;
+                padding: 6px 5px;
+                letter-spacing: 0.2px;
+            }
+            tbody td {
+                font-size: 11px;
+                padding: 4px 5px;
+                line-height: 1.15;
+            }
+            .date-cell,
+            .kg-cell {
+                font-size: 11px;
+            }
+            select.table-select {
+                height: 21px;
+                font-size: 10px;
+                padding: 2px 4px;
+                padding-right: 15px;
+                background-position: right 3px center;
+            }
+        }
+
+        @media screen and (max-width: 1024px) {
+            header {
+                grid-template-columns: minmax(0, 30%) minmax(0, 70%);
+            }
+            .brand {
+                font-size: 13px;
+            }
+            .search-oc-pill {
+                max-width: 155px;
+            }
+            .search-oc-label {
+                display: none;
+            }
+            .search-oc-input {
+                width: 64px;
+            }
+            table {
+                min-width: 920px;
+            }
+        }
+    </style>
+    <style>
         /* RUTA badges: small rounded squares with translucent backgrounds */
         .route-badge {
             display: inline-block;
@@ -951,6 +1086,20 @@
         }
         .btn-guardar:hover {
             background: #1d4ed8;
+        }
+
+        /* Select del modal de cambio de equipo en OC */
+        #modal-corte-oc-equipo-select {
+            height: 40px !important;
+            min-height: 40px;
+            padding: 8px 34px 8px 10px !important;
+            font-size: 14px !important;
+            line-height: 1.2;
+            box-sizing: border-box;
+            background-position: right 10px center;
+        }
+        #modal-corte-oc-equipo-select option {
+            font-size: 14px;
         }
 
         /* Botón de más para tendido */
@@ -1621,275 +1770,139 @@
         .search-filter-clear-btn:active {
             transform: translateY(0);
         }
-    </style>
-    <style>
-        /* Estilos responsivos para tablet y pantallas pequeñas */
-        @media (max-width: 1024px) {
-            html, body { overflow: auto; }
-            body { font-size: 13px; }
-            header { padding: 0 12px; height: 56px; }
-            .brand { font-size: 16px; }
-            .nav-tabs { gap: 8px; flex-wrap: wrap; }
-            .nav-tab { padding: 0 6px; font-size: 13px; }
-            main { padding: 12px; }
-            .sub-nav { margin-bottom: 10px; }
 
-            /* Permitir scroll horizontal dentro del contenedor de la tabla y quitar min-width forzado */
-            .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-            table { min-width: 0 !important; table-layout: auto !important; font-size: 11px; }
-            thead th, tbody td { white-space: normal !important; overflow: visible !important; }
-            #table-habilitado { min-width: 0 !important; table-layout: auto !important; }
-            #table-habilitado th, #table-habilitado td { font-size: 11px; padding: 6px 6px; }
-
-            /* Reducir tamaño de algunos elementos flotantes para que no tapen contenido */
-            #stock-funnel-button { right: 8px; top: 68px; width: 40px; height: 40px; }
-            .floating-menu-toggle { width: 32px; height: 32px; }
-            .funnel-label { width: 100px; font-size: 12px; }
-            .funnel-value { width: 74px; font-size: 12px; }
-            .modal-content { width: 92%; max-width: 720px; }
-        }
-
-        /* Ajustes adicionales para pantallas más pequeñas (teléfonos / tablets pequeños) */
-        @media (max-width: 768px) {
-            body { font-size: 12px; }
-            header { height: 54px; padding: 0 10px; }
-            .brand { font-size: 15px; }
-            .nav-tab { font-size: 12px; }
-            table { font-size: 10px; }
-            #table-habilitado th, #table-habilitado td { font-size: 10px; padding: 5px 6px; }
-            .sub-filters { display: none; }
-            .habilitado-ingresos-plant-pill { padding: 3px 8px; font-size: 10px; }
-        }
-    </style>
-    <style>
-        /* Reglas adicionales para asegurar que en tablet se muestre TODO el contenido
-           - Forzar que celdas puedan envolver texto
-           - Eliminar min-width forzados en tablas
-           - Permitir scroll horizontal dentro del contenedor sin ocultar contenido */
-        @media (max-width: 1024px) {
-            /* Quitar cualquier min-width global de tablas */
-            table { min-width: 0 !important; width: 100% !important; table-layout: fixed !important; }
-            .table-container, main { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
-
-            /* Forzar wrap y visibilidad completa del contenido */
-            thead th, tbody td { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }
-            tbody td { word-break: break-word !important; overflow-wrap: anywhere !important; }
-
-            /* Remover anchos fijos especificos en #table-habilitado para tablet */
-            #table-habilitado, #table-habilitado th, #table-habilitado td { min-width: 0 !important; width: auto !important; max-width: none !important; }
-
-            /* Reducir padding y tamaño de fuente para caber más información */
-            thead th { padding: 8px 6px !important; font-size: 12px !important; }
-            tbody td { padding: 6px 6px !important; font-size: 11px !important; }
-
-            /* Asegurar que cabeceras sticky no oculten filas al hacer scroll */
-            thead th { position: sticky; top: 0; z-index: 12; }
-
-            /* Ocultar elementos no esenciales si siguen tapando espacio (puede ajustarse) */
-            .sub-filters { display: none !important; }
-        }
-
-        /* En pantallas más pequeñas permitir aún más compactación */
-        @media (max-width: 900px) {
-            table { table-layout: auto !important; }
-            thead { display: table-header-group; }
-        }
-    </style>
-    <style>
-        /* Reglas específicas para tablets de 10 pulgadas (aprox. 800–1280px)
-           Objetivo: mostrar TODO el contenido sin recortes, permitiendo wrap/scroll interno
-        */
-        @media (min-width: 800px) and (max-width: 1280px) {
-            body { font-size: 13px; }
-            main { padding: 10px; }
-
-            /* Contenedor de tabla permite scroll horizontal sin ocultar contenido */
-            .table-container { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
-
-            /* Evitar min-widths forzados y permitir que las celdas envuelvan */
-            table { min-width: 0 !important; width: 100% !important; table-layout: auto !important; }
-            thead th, tbody td { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }
-            tbody td { word-break: break-word !important; overflow-wrap: anywhere !important; }
-
-            /* Anular anchos específicos para #table-habilitado que antes usaban !important */
-            #table-habilitado, #table-habilitado th, #table-habilitado td,
-            #table-habilitado th.col-comp-otros, #table-habilitado td.col-comp-otros,
-            #table-habilitado th.col-observaciones, #table-habilitado td.col-observaciones,
-            #table-habilitado th.col-validacion, #table-habilitado td.cell-validacion,
-            #table-habilitado th.col-cert, #table-habilitado td.cell-cert,
-            #table-habilitado th.col-pda, #table-habilitado td.cell-pda,
-            #table-habilitado th.col-color, #table-habilitado td.cell-color,
-            #table-habilitado th.col-planta, #table-habilitado td.cell-planta,
-            #table-habilitado th.col-linea, #table-habilitado td.linea-cell,
-            #table-habilitado th.col-hab, #table-habilitado td.cell-hab {
-                min-width: 0 !important; max-width: none !important; width: auto !important;
+        /* Responsive tablet 10" (NOVAT): prioridad final */
+        @media screen and (max-height: 860px), screen and (max-width: 1180px) {
+            body {
+                font-size: 12px;
             }
-
-            /* Compactar espacio interno para mostrar más columnas */
-            #table-habilitado th, #table-habilitado td { padding: 6px 6px !important; font-size: 11px !important; }
-
-            /* Mantener headers sticky visibles */
-            thead th { position: sticky; top: 0; z-index: 22; }
-
-            /* Inputs y selects más compactos */
-            select.table-select, input.prioridad-input { font-size: 11px !important; height: 26px !important; }
-
-            /* Ajustes flotantes para no tapar contenido en tablets */
-            #stock-funnel-button { right: 10px; top: 74px; }
-            .floating-menu-container { bottom: 16px; right: 14px; }
-        }
-
-        /* Si el tablet está en landscape amplio, permitir más espacio pero conservar wrapping */
-        @media (min-width: 1024px) and (max-width: 1400px) and (orientation: landscape) {
-            thead th, tbody td { white-space: normal !important; }
-            .table-container { overflow-x: auto !important; }
-        }
-    </style>
-    <style>
-        /* Override final para tablet/movil: estabiliza layout y evita desalineaciones */
-        @media (min-width: 768px) and (max-width: 1366px) {
-            html, body { overflow: hidden !important; }
-            body { font-size: 13px !important; }
-            header { padding: 0 12px !important; height: 56px !important; }
-            .brand { font-size: 16px !important; }
-
+            header {
+                height: 54px;
+                padding: 0 10px;
+                display: grid;
+                grid-template-columns: minmax(0, 34%) minmax(0, 66%);
+                column-gap: 8px;
+                overflow: hidden;
+            }
+            .brand {
+                min-width: 0;
+                gap: 5px;
+                font-size: 14px;
+                white-space: nowrap;
+                overflow: hidden;
+            }
+            .search-oc-pill {
+                margin-left: 8px;
+                padding: 3px 8px;
+                border-radius: 16px;
+                max-width: 180px;
+                min-width: 0;
+            }
+            .search-oc-label {
+                font-size: 10px;
+            }
+            .search-oc-input {
+                width: 72px;
+                font-size: 11px;
+            }
+            .search-filter-clear-btn {
+                width: 26px;
+                height: 26px;
+                margin-left: 4px;
+            }
+            .search-filter-clear-btn i {
+                font-size: 12px;
+            }
             .nav-tabs {
-                gap: 8px !important;
-                flex-wrap: nowrap !important;
-                overflow-x: auto !important;
-                -webkit-overflow-scrolling: touch;
+                min-width: 0;
+                display: grid;
+                grid-template-columns: repeat(7, minmax(0, 1fr));
+                gap: 2px;
+                height: 100%;
+                align-items: stretch;
             }
             .nav-tab {
-                flex: 0 0 auto !important;
-                padding: 0 6px !important;
-                font-size: 12px !important;
+                min-width: 0;
+                padding: 0 2px;
+                gap: 3px;
+                justify-content: center;
+                font-size: 10.5px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
-
+            .nav-tab i {
+                display: none;
+            }
+            .nav-tab .badge {
+                font-size: 9px;
+                padding: 0 4px;
+                border-radius: 8px;
+                flex-shrink: 0;
+            }
             main {
-                padding: 10px !important;
-                overflow: auto !important;
-                -webkit-overflow-scrolling: touch;
+                padding: 8px;
             }
-            .view-section { min-height: 0 !important; }
-
             .sub-nav {
-                max-width: 100% !important;
-                overflow-x: auto !important;
-                -webkit-overflow-scrolling: touch;
-                white-space: nowrap !important;
+                margin-bottom: 8px;
+                padding: 2px;
+                gap: 2px;
             }
-            .sub-tab,
-            .kg-badge,
-            .xhabi-pill,
-            .btn-habilitado-ingresos,
-            .btn-print-circle { flex: 0 0 auto !important; }
-
-            .sub-filters {
-                margin-left: 8px !important;
-                flex-wrap: nowrap !important;
-                overflow-x: auto !important;
-                -webkit-overflow-scrolling: touch;
+            .sub-tab {
+                padding: 4px 8px;
+                font-size: 12px;
+                gap: 4px;
             }
-
-            .table-container,
-            #view-habilitado .table-container {
-                overflow-x: auto !important;
-                overflow-y: auto !important;
-                -webkit-overflow-scrolling: touch;
+            .kg-badge {
+                font-size: 10px;
+                padding: 1px 4px;
             }
-
             table {
-                width: max-content !important;
-                min-width: 1120px !important;
-                table-layout: fixed !important;
-                font-size: 11px !important;
+                min-width: 980px;
+                font-size: 11px;
             }
-            #table-habilitado {
-                width: max-content !important;
-                min-width: 1120px !important;
-                table-layout: fixed !important;
+            thead th {
+                font-size: 12px;
+                padding: 6px 5px;
+                letter-spacing: 0.2px;
             }
-
-            thead th,
-            tbody td,
-            #table-habilitado th,
-            #table-habilitado td {
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
-                word-break: normal !important;
-                overflow-wrap: normal !important;
-                font-size: 11px !important;
-                padding: 6px 6px !important;
+            tbody td {
+                font-size: 11px;
+                padding: 4px 5px;
+                line-height: 1.15;
             }
-
-            #table-habilitado th.col-comp-otros,
-            #table-habilitado td.col-comp-otros {
-                width: 140px !important;
-                min-width: 140px !important;
-                max-width: 140px !important;
+            .date-cell,
+            .kg-cell {
+                font-size: 11px;
             }
-            #table-habilitado th.col-observaciones,
-            #table-habilitado td.col-observaciones {
-                width: 220px !important;
-                min-width: 220px !important;
-                max-width: 220px !important;
+            select.table-select {
+                height: 21px;
+                font-size: 10px;
+                padding: 2px 4px;
+                padding-right: 15px;
+                background-position: right 3px center;
             }
-            #view-habilitado #table-habilitado th:nth-child(6),
-            #view-habilitado #table-habilitado td.oc-cell {
-                width: 90px !important;
-                min-width: 90px !important;
-            }
-            #view-habilitado #table-habilitado td.oc-cell,
-            #view-habilitado #table-habilitado td.oc-cell .oc-link {
-                white-space: nowrap !important;
-                overflow-wrap: normal !important;
-                word-break: normal !important;
-            }
-
-            #stock-funnel-button { right: 10px !important; top: 70px !important; width: 40px !important; height: 40px !important; }
-            .floating-menu-toggle { width: 32px !important; height: 32px !important; }
-            .floating-menu-container { right: 12px !important; bottom: 14px !important; }
-            .funnel-label { width: 100px !important; font-size: 12px !important; }
-            .funnel-value { width: 74px !important; font-size: 12px !important; }
-            .modal-content { width: 92% !important; max-width: 760px !important; }
         }
 
-        @media (max-width: 767px) {
-            html, body { overflow: auto !important; }
-            body { font-size: 12px !important; }
-            header { height: 54px !important; padding: 0 10px !important; }
-            .brand { font-size: 15px !important; }
-            .nav-tabs {
-                gap: 6px !important;
-                overflow-x: auto !important;
-                flex-wrap: nowrap !important;
-                -webkit-overflow-scrolling: touch;
+        @media screen and (max-width: 1024px) {
+            header {
+                grid-template-columns: minmax(0, 30%) minmax(0, 70%);
             }
-            .nav-tab { flex: 0 0 auto !important; font-size: 12px !important; }
-            main { padding: 8px !important; }
-            .sub-nav {
-                max-width: 100% !important;
-                overflow-x: auto !important;
-                -webkit-overflow-scrolling: touch;
-                white-space: nowrap !important;
+            .brand {
+                font-size: 13px;
             }
-            .sub-filters { display: none !important; }
+            .search-oc-pill {
+                max-width: 155px;
+            }
+            .search-oc-label {
+                display: none;
+            }
+            .search-oc-input {
+                width: 64px;
+            }
             table {
-                min-width: 900px !important;
-                table-layout: fixed !important;
-                font-size: 10px !important;
+                min-width: 920px;
             }
-            thead th,
-            tbody td,
-            #table-habilitado th,
-            #table-habilitado td {
-                white-space: nowrap !important;
-                font-size: 10px !important;
-                padding: 5px 6px !important;
-            }
-            .habilitado-ingresos-plant-pill { padding: 3px 8px !important; font-size: 10px !important; }
-            .modal-content { width: 96% !important; }
         }
     </style>
 </head>
@@ -1917,6 +1930,7 @@
                 <div>
                     <div class="modal-title" id="modal-tendido-title">OC: ---</div>
                     <div class="modal-subtitle" id="modal-tendido-subtitle">COLOR: --- | PDS: ---</div>
+            </html>
                 </div>
                 <button class="modal-close" onclick="cerrarModalTendido()">&times;</button>
             </div>
@@ -2016,7 +2030,7 @@
             </div>
             <div style="padding: 10px 6px; font-size: 13px; color: var(--gray-700);">
                 <div style="margin-bottom: 8px;"><strong>Nuevo equipo:</strong></div>
-                <select id="modal-corte-oc-equipo-select" class="table-select" style="width:100%; padding:8px; font-size:13px;">
+                <select id="modal-corte-oc-equipo-select" class="table-select" style="width:100%;">
                     <option value="">-- Seleccionar --</option>
                 </select>
                 <div id="modal-corte-oc-equipo-info" style="margin-top:10px; font-size:12px; color:var(--gray-500);"></div>
@@ -2821,11 +2835,12 @@
             rows: []
         };
 
-        // Variables para modal de cambio de equipo_corte desde OC (doble click)
+        // Variables para modal de cambio de equipo_corte desde OC (click derecho)
         let modalCorteOcEquipoData = {
             rowIndices: [],
             opPtda: ''
         };
+        let corteOcContextMenuRowIndex = null;
 
         // Maneja cambios en el select de n.transfxpda; si está marcado 'Para todo'
         // aplica el mismo valor a todos los grupos visibles y dispara el guardado.
@@ -8244,7 +8259,7 @@
                     ${fIngCostHtml}
                     <td title="${cliente}">${cliente}</td>
                     <td title="${rutaVal}">${rutaDisplay}</td>
-                    <td class="op-cell oc-cell" title="${oc}">${tendidoBtnHtml}<span class="oc-link" onclick="if(isHabilitadoView()) abrirModalOC(${rowIndex});" ondblclick="abrirModalEquipoCorteOC(${rowIndex});">${oc}</span></td>
+                    <td class="op-cell oc-cell" title="${oc}">${tendidoBtnHtml}<span class="oc-link" onclick="if(isHabilitadoView()) abrirModalOC(${rowIndex});" oncontextmenu="showCorteOcContextMenu(event, ${rowIndex}); return false;">${oc}</span></td>
                     <td title="${color}">${color}</td>
                     <td class="op-cell wrap-text" title="${opPtda}">${opPtdaHtml}</td>
                     <td class="kg-cell" style="text-align:center;">${pdsStr}</td>
@@ -13982,8 +13997,62 @@
         };
 
         // ===============================
-        // MODAL CAMBIO EQUIPO_CORTE DESDE OC (DOBLE CLICK)
+        // MENÚ CONTEXTUAL OC (CLICK DERECHO) Y MODAL CAMBIO EQUIPO_CORTE
         // ===============================
+        window.showCorteOcContextMenu = function(event, rowIndex) {
+            try {
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                const viewCorte = document.getElementById('view-corte');
+                const corteFilterNorm = String(currentCorteFilter || '').toUpperCase().trim();
+                const isProgSubtab = (corteFilterNorm === 'PROG 1T' || corteFilterNorm === 'PROG 2T' || corteFilterNorm === 'PROG 3T');
+                if (!viewCorte || !viewCorte.classList.contains('active') || !isProgSubtab || isHabilitadoView()) return false;
+                if (!Number.isInteger(rowIndex) || rowIndex < 1 || !rawData || !rawData[rowIndex]) return false;
+
+                const menu = document.getElementById('corte-oc-context-menu');
+                if (!menu) return false;
+
+                corteOcContextMenuRowIndex = rowIndex;
+                menu.classList.add('active');
+
+                const menuWidth = menu.offsetWidth || 240;
+                const menuHeight = menu.offsetHeight || 44;
+                const maxLeft = Math.max(8, window.innerWidth - menuWidth - 8);
+                const maxTop = Math.max(8, window.innerHeight - menuHeight - 8);
+                const left = Math.min(Math.max(8, event.clientX), maxLeft);
+                const top = Math.min(Math.max(8, event.clientY), maxTop);
+
+                menu.style.left = left + 'px';
+                menu.style.top = top + 'px';
+            } catch (e) {
+                console.error('Error showCorteOcContextMenu:', e);
+            }
+            return false;
+        };
+
+        window.hideCorteOcContextMenu = function() {
+            const menu = document.getElementById('corte-oc-context-menu');
+            if (menu) menu.classList.remove('active');
+            corteOcContextMenuRowIndex = null;
+        };
+
+        window.abrirModalEquipoCorteOCDesdeMenu = function() {
+            const rowIndex = corteOcContextMenuRowIndex;
+            hideCorteOcContextMenu();
+            if (!Number.isInteger(rowIndex) || rowIndex < 1) return;
+            abrirModalEquipoCorteOC(rowIndex);
+        };
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('corte-oc-context-menu');
+            if (menu && !menu.contains(e.target)) {
+                hideCorteOcContextMenu();
+            }
+        });
+
         function getEquipoCorteColumnIndex() {
             let idx = findHeaderIndexCaseInsensitive('equipo_corte');
             if (idx === -1) idx = findHeaderIndexCaseInsensitive('EQUIPO CORTE');
@@ -15318,6 +15387,11 @@ NOTA: Por favor adjunte los archivos descargados (${fileName}.xlsx y ${fileName}
         </div>
     </div>
 
+    <!-- MENÚ CONTEXTUAL PARA OC EN CORTE PZAS -->
+    <div id="corte-oc-context-menu" class="context-menu" style="width:240px; min-width:240px;">
+        <div class="context-menu-item" onclick="abrirModalEquipoCorteOCDesdeMenu()">Cambiar de equipo de corte</div>
+    </div>
+
     <!-- AUTO-REFRESH TIMER -->
     <div id="auto-refresh-badge" title="Auto-refresh" style="position:fixed;bottom:6px;left:6px;z-index:9999;display:flex;align-items:center;gap:5px;background:rgba(30,41,59,.82);color:#e2e8f0;font-family:'Inter',sans-serif;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;backdrop-filter:blur(4px);user-select:none;cursor:default;transition:opacity .3s;opacity:.55;">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
@@ -15388,3 +15462,7 @@ NOTA: Por favor adjunte los archivos descargados (${fileName}.xlsx y ${fileName}
 
     </body>
     </html>
+
+
+
+
