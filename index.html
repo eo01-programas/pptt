@@ -2337,11 +2337,9 @@
                     <thead>
                         <tr>
                             <th id="th-bloqueo-p" style="width: 30px; display:none;">P</th>
-                            <th style="width: 70px;">F. GIRADO</th>
                             <th style="width: 65px; text-align: center;">HOD</th>
                             <th style="width: 65px; text-align: center;">F.ING.COST</th>
                             <th style="width: 30px;">CLIENTE</th>
-                            <th style="width: 60px;">RUTA</th>
                             
                             <!-- AUMENTADO A 80px PARA VER DATOS LARGOS -->
                             <th style="width: 80px;">OP-PTDA</th>
@@ -2676,7 +2674,6 @@
                         <tr>
                             <th style="width: 18px;">RSV</th>
                             <th id="th-corte-p" style="width: 30px; display:none;">P</th>
-                            <th style="width: 70px;">F. GIRADO</th>
                             <th style="width: 65px; text-align: center;">HOD</th>
                             <th style="width: 75px; text-align: center;">F.ING.COST</th>
                             <th style="width: 40px;">CLIENTE</th>
@@ -5715,11 +5712,11 @@
                     
                     count++;
                     const tr = createRow(row, i, "corte", currentGroup);
-                    // En sub-tabs PROG, eliminar celda de equipo_corte (posición 14, después de RIB)
+                    // En sub-tabs PROG, eliminar celda de equipo_corte (posición 13, después de RIB)
                     const tds = tr.querySelectorAll('td');
-                    if (tds && tds.length >= 15) {
-                        // Eliminar celda equipo_corte (índice 14, después de RIB y antes de STATUS_CORTE)
-                        tds[14].remove();
+                    if (tds && tds.length >= 14) {
+                        // Eliminar celda equipo_corte (índice 13, después de RIB y antes de STATUS_CORTE)
+                        tds[13].remove();
                     }
                     
                     // Agregar celda P al inicio en sub-tabs PROG
@@ -5913,16 +5910,15 @@
                 } catch (e) {}
                 try {
                     // La fila de createRow tipo "corte" genera columnas en este orden:
-                    // 0:RSV, 1:F.GIRADO, 2:HOD, 3:F.ING.COST, 4:CLIENTE, 5:RUTA, 6:OC, 7:COLOR,
-                    // 8:OP-PTDA, 9:PDS, 10:PRENDA, 11:ARTÍCULO, 12:TIPO CERT., 13:RIB,
-                    // 14:equipo_corte, 15:STATUS_CORTE, 16:BLOQUES?, 17:COLL o TAP?
-                    // Para Enumerado, eliminamos: RSV, F.GIRADO, OP-PTDA, ARTÍCULO, COLL o TAP?
+                    // 0:RSV, 1:HOD, 2:F.ING.COST, 3:CLIENTE, 4:RUTA, 5:OC, 6:COLOR,
+                    // 7:OP-PTDA, 8:PDS, 9:PRENDA, 10:ARTÍCULO, 11:TIPO CERT., 12:RIB,
+                    // 13:equipo_corte, 14:STATUS_CORTE, 15:BLOQUES?, 16:COLL o TAP?
+                    // Para Enumerado, eliminamos: RSV, OP-PTDA, ARTÍCULO, COLL o TAP?
                     const tds = tr.querySelectorAll('td');
                     // Eliminar en orden descendente para no alterar los índices
-                    if (tds.length > 17) tds[17].remove(); // COLL o TAP?
-                    if (tds.length > 11) tds[11].remove(); // ARTÍCULO
-                    if (tds.length > 8) tds[8].remove();   // OP-PTDA
-                    if (tds.length > 1) tds[1].remove();   // F.GIRADO
+                    if (tds.length > 16) tds[16].remove(); // COLL o TAP?
+                    if (tds.length > 10) tds[10].remove(); // ARTÍCULO
+                    if (tds.length > 7) tds[7].remove();   // OP-PTDA
                     if (tds.length > 0) tds[0].remove();   // RSV
                 } catch (e) {}
 
@@ -8254,8 +8250,6 @@
                 const articulo = getVal(row, "ARTÍCULO");
                 const nroMolde = getVal(row, "NRO. MOLDE");
                 const tipoCert = normalizeTipoCert(getVal(row, "TIPO CERTIFICADO"));
-                const fGirado = formatValue(getVal(row, "F. GIRADO"), 'date');
-                const ruta = getVal(row, "RUTA TELA") || "";
 
                 let controlHtml = "";
 
@@ -8408,11 +8402,9 @@
 
                 // Usamos title para mostrar el dato completo en hover por si acaso
                 let html = `
-                    ${type === "bloqueo" ? `<td>${fGirado}</td>` : ''}
                     <td class="date-cell">${fDespacho}</td>
                     ${fIngCostHtml}
                     <td>${cliente}</td>
-                    ${type === "bloqueo" ? `<td title="${ruta}">${ruta}</td>` : ''}
                     <!-- TOOLTIP TITLE PARA VER TEXTO COMPLETO -->
                     <td class="op-cell wrap-text" title="${opPtda}">${opPtda}</td>
                     <td class="op-cell oc-cell" title="${oc}">${oc}</td>
@@ -8502,7 +8494,6 @@
 
                 const rawColor = getVal(row, "COLOR");
                 const color = abbreviateHeather(rawColor);
-                const fGirado = formatValue(getVal(row, "F. GIRADO"), 'date');
 
                 const opTela = String(getVal(row, "OP TELA") || "").trim();
                 const partida = String(getVal(row, "PARTIDA") || "").trim();
@@ -8551,7 +8542,6 @@
 
                 let html = `
                     <td title="${rsv}">${rsv}</td>
-                    <td>${fGirado}</td>
                     <td class="date-cell">${fDespacho}</td>
                     ${fIngCostHtml}
                     <td title="${cliente}">${cliente}</td>
@@ -12677,12 +12667,11 @@
 
                 const tr = createRow(row, i, 'corte', currentGroup);
 
-                // Eliminar las primeras dos celdas (RSV y F.GIRADO) que no corresponden a Corte Bloques
+                // Eliminar la primera celda (RSV) que no corresponde a Corte Bloques
                 try {
                     const tdsStart = tr.querySelectorAll('td');
-                    if (tdsStart.length >= 2) {
+                    if (tdsStart.length >= 1) {
                         tdsStart[0].remove(); // RSV
-                        tr.querySelectorAll('td')[0].remove(); // F.GIRADO (ahora es la primera)
                     }
                 } catch (e) {}
 
@@ -15698,12 +15687,12 @@ NOTA: Por favor adjunte los archivos descargados (${fileName}.xlsx y ${fileName}
     <!-- AUTO-REFRESH TIMER -->
     <div id="auto-refresh-badge" title="Auto-refresh" style="position:fixed;bottom:6px;left:6px;z-index:9999;display:flex;align-items:center;gap:5px;background:rgba(30,41,59,.82);color:#e2e8f0;font-family:'Inter',sans-serif;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;backdrop-filter:blur(4px);user-select:none;cursor:default;transition:opacity .3s;opacity:.55;">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        <span id="ar-seconds">30</span>s
+        <span id="ar-seconds">90</span>s
         <span id="ar-paused-icon" style="display:none;color:#fbbf24;font-size:9px;">&#9646;&#9646;</span>
     </div>
     <script>
     (function(){
-        var INTERVAL = 30;
+        var INTERVAL = 90;
         var IDLE_DELAY = 3000;
         var secs = INTERVAL;
         var paused = false;
