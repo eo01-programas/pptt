@@ -1721,6 +1721,76 @@
             padding-right: 14px;
         }
 
+        /* Corte Pzas: compactar tabla para tablets anchas y mantener OC completa */
+        @media screen and (max-width: 1366px) and (orientation: landscape) {
+            #view-corte .table-container {
+                overflow-x: hidden;
+            }
+
+            #view-corte .table-container table {
+                width: 100% !important;
+                min-width: 0 !important;
+                table-layout: fixed !important;
+                font-size: 10px !important;
+            }
+
+            #view-corte .table-container thead th {
+                font-size: 10px !important;
+                padding: 4px 2px !important;
+                letter-spacing: 0 !important;
+            }
+
+            #view-corte .table-container tbody td {
+                font-size: 9.5px !important;
+                padding: 3px 2px !important;
+                line-height: 1.1 !important;
+            }
+
+            /* Anchos por columna (considerando th-corte-p como primera columna) */
+            #view-corte .table-container thead th:nth-child(2) { width: 50px !important; } /* HOD */
+            #view-corte .table-container thead th:nth-child(3) { width: 48px !important; } /* F.ING */
+            #view-corte .table-container thead th:nth-child(4) { width: 34px !important; } /* CLIENTE */
+            #view-corte .table-container thead th:nth-child(5) { width: 40px !important; } /* RUTA */
+            #view-corte .table-container thead th:nth-child(6) { width: 86px !important; } /* OC */
+            #view-corte .table-container thead th:nth-child(7) { width: 56px !important; } /* COLOR */
+            #view-corte .table-container thead th:nth-child(8) { width: 64px !important; } /* OP-PTDA */
+            #view-corte .table-container thead th:nth-child(9) { width: 36px !important; } /* PDS */
+            #view-corte .table-container thead th:nth-child(10) { width: 50px !important; } /* PRENDA */
+            #view-corte .table-container thead th:nth-child(11) { width: 50px !important; } /* ART. */
+            #view-corte .table-container thead th:nth-child(12) { width: 56px !important; } /* TIPO CERT. */
+            #view-corte .table-container thead th:nth-child(13) { width: 50px !important; } /* RIB */
+            #view-corte .table-container thead th:nth-child(14) { width: 58px !important; } /* equipo */
+            #view-corte .table-container thead th:nth-child(15) { width: 58px !important; } /* status */
+            #view-corte .table-container thead th:nth-child(16) { width: 52px !important; } /* bloques */
+            #view-corte .table-container thead th:nth-child(17) { width: 52px !important; } /* coll/tap */
+
+            #view-corte .route-badge {
+                font-size: 9px !important;
+                padding: 1px 4px !important;
+                line-height: 1 !important;
+            }
+
+            /* OC siempre completa en una sola línea */
+            #view-corte .table-container tbody td.oc-cell,
+            #view-corte .table-container tbody td.oc-cell .oc-link,
+            #view-corte .table-container tbody td.oc-cell span {
+                min-width: 86px !important;
+                white-space: nowrap !important;
+                overflow-wrap: normal !important;
+                word-break: normal !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
+            }
+
+            #view-corte .table-container select.table-select {
+                min-width: 0 !important;
+                height: 20px !important;
+                font-size: 9.5px !important;
+                padding: 1px 12px 1px 3px !important;
+                background-position: right 3px center !important;
+            }
+        }
+
         /* --- Tablet landscape compact fix (NOVAT 10") --- */
         @media screen and (max-width: 1100px) and (orientation: landscape) {
             body { font-size: 12px; }
