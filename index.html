@@ -1661,6 +1661,40 @@
             .habilitado-ingresos-plant-pill { padding: 3px 8px; font-size: 10px; }
         }
     </style>
+    <style>
+        /* Reglas adicionales para asegurar que en tablet se muestre TODO el contenido
+           - Forzar que celdas puedan envolver texto
+           - Eliminar min-width forzados en tablas
+           - Permitir scroll horizontal dentro del contenedor sin ocultar contenido */
+        @media (max-width: 1024px) {
+            /* Quitar cualquier min-width global de tablas */
+            table { min-width: 0 !important; width: 100% !important; table-layout: fixed !important; }
+            .table-container, main { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+
+            /* Forzar wrap y visibilidad completa del contenido */
+            thead th, tbody td { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }
+            tbody td { word-break: break-word !important; overflow-wrap: anywhere !important; }
+
+            /* Remover anchos fijos especificos en #table-habilitado para tablet */
+            #table-habilitado, #table-habilitado th, #table-habilitado td { min-width: 0 !important; width: auto !important; max-width: none !important; }
+
+            /* Reducir padding y tamaño de fuente para caber más información */
+            thead th { padding: 8px 6px !important; font-size: 12px !important; }
+            tbody td { padding: 6px 6px !important; font-size: 11px !important; }
+
+            /* Asegurar que cabeceras sticky no oculten filas al hacer scroll */
+            thead th { position: sticky; top: 0; z-index: 12; }
+
+            /* Ocultar elementos no esenciales si siguen tapando espacio (puede ajustarse) */
+            .sub-filters { display: none !important; }
+        }
+
+        /* En pantallas más pequeñas permitir aún más compactación */
+        @media (max-width: 900px) {
+            table { table-layout: auto !important; }
+            thead { display: table-header-group; }
+        }
+    </style>
 </head>
 <body>
 
