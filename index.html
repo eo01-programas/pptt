@@ -1695,6 +1695,56 @@
             thead { display: table-header-group; }
         }
     </style>
+    <style>
+        /* Reglas específicas para tablets de 10 pulgadas (aprox. 800–1280px)
+           Objetivo: mostrar TODO el contenido sin recortes, permitiendo wrap/scroll interno
+        */
+        @media (min-width: 800px) and (max-width: 1280px) {
+            body { font-size: 13px; }
+            main { padding: 10px; }
+
+            /* Contenedor de tabla permite scroll horizontal sin ocultar contenido */
+            .table-container { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+
+            /* Evitar min-widths forzados y permitir que las celdas envuelvan */
+            table { min-width: 0 !important; width: 100% !important; table-layout: auto !important; }
+            thead th, tbody td { white-space: normal !important; overflow: visible !important; text-overflow: clip !important; }
+            tbody td { word-break: break-word !important; overflow-wrap: anywhere !important; }
+
+            /* Anular anchos específicos para #table-habilitado que antes usaban !important */
+            #table-habilitado, #table-habilitado th, #table-habilitado td,
+            #table-habilitado th.col-comp-otros, #table-habilitado td.col-comp-otros,
+            #table-habilitado th.col-observaciones, #table-habilitado td.col-observaciones,
+            #table-habilitado th.col-validacion, #table-habilitado td.cell-validacion,
+            #table-habilitado th.col-cert, #table-habilitado td.cell-cert,
+            #table-habilitado th.col-pda, #table-habilitado td.cell-pda,
+            #table-habilitado th.col-color, #table-habilitado td.cell-color,
+            #table-habilitado th.col-planta, #table-habilitado td.cell-planta,
+            #table-habilitado th.col-linea, #table-habilitado td.linea-cell,
+            #table-habilitado th.col-hab, #table-habilitado td.cell-hab {
+                min-width: 0 !important; max-width: none !important; width: auto !important;
+            }
+
+            /* Compactar espacio interno para mostrar más columnas */
+            #table-habilitado th, #table-habilitado td { padding: 6px 6px !important; font-size: 11px !important; }
+
+            /* Mantener headers sticky visibles */
+            thead th { position: sticky; top: 0; z-index: 22; }
+
+            /* Inputs y selects más compactos */
+            select.table-select, input.prioridad-input { font-size: 11px !important; height: 26px !important; }
+
+            /* Ajustes flotantes para no tapar contenido en tablets */
+            #stock-funnel-button { right: 10px; top: 74px; }
+            .floating-menu-container { bottom: 16px; right: 14px; }
+        }
+
+        /* Si el tablet está en landscape amplio, permitir más espacio pero conservar wrapping */
+        @media (min-width: 1024px) and (max-width: 1400px) and (orientation: landscape) {
+            thead th, tbody td { white-space: normal !important; }
+            .table-container { overflow-x: auto !important; }
+        }
+    </style>
 </head>
 <body>
 
