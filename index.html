@@ -1641,11 +1641,19 @@
 
             main { padding: 8px; }
 
-            .sub-nav,
+            .sub-nav {
+                width: 100%;
+                display: flex !important;
+                align-items: center;
+                flex-wrap: nowrap;
+                gap: 4px !important;
+                min-width: 0;
+                overflow: hidden;
+            }
+
             #bordado-subtabs,
             #estampado-subtabs {
                 width: 100%;
-                display: flex !important;
                 align-items: center;
                 flex-wrap: nowrap;
                 gap: 4px !important;
@@ -1826,6 +1834,12 @@
             #table-habilitado th:nth-child(2)  { width: 38px !important; }       /* HOD */
             #table-habilitado th:nth-child(3)  { width: 38px !important; }       /* F.ING */
             #table-habilitado th:nth-child(4)  { width: 36px !important; }       /* STATUS */
+            /* STATUS pills más compactos */
+            #table-habilitado td.status-cell .pill {
+                font-size: 7.5px !important;
+                padding: 2px 4px !important;
+                font-weight: 600 !important;
+            }
             #table-habilitado th:nth-child(5)  { width: 26px !important; }       /* CLI */
             #table-habilitado th:nth-child(6)  { width: 70px !important; }       /* OC */
             /* Override base 110px min-width OC (2-ID specificity match) */
@@ -7182,7 +7196,8 @@
                             headerRow.style.fontSize = '13px';
                             
                             // Calcular colspan: 16 columnas en Habilitado (incluye OBSERVACIONES, VALIDACION, PLANTA y LINEA)
-                            const colspan = '16';
+                            // En PROG 1T/2T/3T se oculta F.ING -> 15 columnas
+                            const colspan = isProgSubtab ? '15' : '16';
                             
                             // Calcular suma de PDS para este grupo de TRSF
                             let pdsTrsf = 0;
@@ -7637,8 +7652,8 @@
                     tr.innerHTML = `
                         <td class="p-cell">${pCell.innerHTML}</td>
                         ${hodHtml}
-                        ${fIngHtml}
-                        <td style="text-align:center;" title="${statusValue}">${statusHtml.replace(/<td[^>]*>|<\/td>/g, '')}</td>
+                        ${isProgSubtab ? '' : fIngHtml}
+                        <td class="status-cell" style="text-align:center;" title="${statusValue}">${statusHtml.replace(/<td[^>]*>|<\/td>/g, '')}</td>
                         <td style="text-align:center;" title="${cliente}">${cliente}</td>
                         ${ocHtml}
                         <td class="cell-color" title="${color}">${color}</td>
@@ -7698,6 +7713,10 @@
                 initializeHabilitadoHeaderContextMenus();
             }
             
+            // Ocultar/mostrar columna F.ING según subtab
+            const fIngTh = document.querySelector('#table-habilitado thead th:nth-child(3)');
+            if (fIngTh) fIngTh.style.display = isProgSubtab ? 'none' : '';
+
             // Marcar columnas filtradas visualmente
             markFilteredColumns('view-habilitado', habilitadoHeaderFilters.length > 0 ? habilitadoHeaderFilters : []);
         }
