@@ -1373,6 +1373,17 @@
             transform: translateY(0);
         }
 
+        /* Corte Pzas: tabla ocupa 100% del ancho */
+        #view-corte .table-container {
+            width: 100%;
+            overflow-x: hidden;
+        }
+        #view-corte .table-container table {
+            width: 100% !important;
+            min-width: 0 !important;
+            table-layout: fixed !important;
+        }
+
         /* Corte Pzas: hacer RUTA un poco mas compacta */
         #view-corte .route-badge {
             font-size: 10px;
