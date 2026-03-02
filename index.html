@@ -3336,7 +3336,7 @@
 
         // --- HELPER PARA CREAR CELDA "P" CON CUADRO DE TEXTO ---
         function createPrioridadCell(rowIndex, row) {
-            // Obtener valor actual de la columna P
+            // Obtener valor actual de la columna P (solo lectura)
             let pValue = '';
             try {
                 const idxP = findHeaderIndexCaseInsensitive('P');
@@ -3345,80 +3345,7 @@
                 }
             } catch (e) {}
             
-            return `<td class="p-cell">
-                <input type="text" class="prioridad-input" value="${pValue}" 
-                       onchange="updatePrioridad(${rowIndex}, this.value, this)" 
-                       onblur="updatePrioridad(${rowIndex}, this.value, this)">
-            </td>`;
-        }
-
-        // --- FUNCIÓN PARA ACTUALIZAR PRIORIDAD Y PROPAGAR A MISMO OP-PTDA ---
-        function updatePrioridad(rowIndex, value, selectElement) {
-            // PROTECCIÓN: No permitir escritura en encabezados
-            if (rowIndex < 1 || !rawData[rowIndex]) {
-                console.error('PROTECCIÓN updatePrioridad: rowIndex inválido=' + rowIndex);
-                return;
-            }
-            // Determinar vista actual
-            const isBloqueoView = document.getElementById('view-bloqueo') && document.getElementById('view-bloqueo').classList.contains('active');
-            const isLavadoView = document.getElementById('view-lavado') && document.getElementById('view-lavado').classList.contains('active');
-            const isCorteView = document.getElementById('view-corte') && document.getElementById('view-corte').classList.contains('active');
-            
-            // Solo propagar en las vistas especificadas
-            const shouldPropagate = isBloqueoView || isLavadoView || isCorteView;
-            
-            if (!shouldPropagate) {
-                // Para otras vistas, solo actualizar la fila actual
-                updateRow(rowIndex, 'P', value, selectElement);
-                return;
-            }
-            
-            // Obtener OP-PTDA de la fila actual
-            const row = rawData[rowIndex];
-            if (!row) return;
-            
-            const opTela = String(row[colMap["OP TELA"]] || "").trim().toLowerCase();
-            const partida = String(row[colMap["PARTIDA"]] || "").trim().toLowerCase();
-            const currentOpPtda = opTela + "-" + partida;
-            
-            // Encontrar índice de columna P
-            const idxP = findHeaderIndexCaseInsensitive('P');
-            if (idxP === -1) return;
-            
-            // 1. PRIMERO: Actualizar INMEDIATAMENTE todas las filas en rawData (UI local)
-            const rowsToUpdate = [];
-            for (let i = 1; i < rawData.length; i++) {
-                const r = rawData[i];
-                const opT = String(r[colMap["OP TELA"]] || "").trim().toLowerCase();
-                const part = String(r[colMap["PARTIDA"]] || "").trim().toLowerCase();
-                const opPtda = opT + "-" + part;
-                
-                if (opPtda === currentOpPtda) {
-                    rawData[i][idxP] = value;
-                    rowsToUpdate.push(i);
-                }
-            }
-            
-            // 2. SEGUNDO: Re-renderizar INMEDIATAMENTE para mostrar el cambio visual
-            updateCounters();
-            if (isBloqueoView) renderBloqueo();
-            else if (isLavadoView) renderLavado();
-            else if (isCorteView) renderCorte();
-            
-            // 3. TERCERO: Guardar en el backend de forma ASÍNCRONA (sin bloquear UI)
-            // Enviar todas las actualizaciones sin esperar respuesta
-            rowsToUpdate.forEach(i => {
-                fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify({
-                        action: "update",
-                        row: i,
-                        colName: "P",
-                        value: value
-                    })
-                }).catch(e => console.error('Error guardando P fila', i, e));
-            });
+            return `<td class="p-cell" style="text-align:center;">${pValue}</td>`;
         }
 
         // --- FUNCIÓN PARA ACTUALIZAR PLANTA EN HABILITADO ---
@@ -3439,71 +3366,7 @@
         }
 
         // --- FUNCION PARA EDITAR HOD CON DOBLE CLICK EN HABILITADO ---
-        function editHodDate(cell, rowIndex) {
-            if (rowIndex < 1 || !rawData[rowIndex]) {
-                console.error('PROTECCION editHodDate: rowIndex invalido=' + rowIndex);
-                return;
-            }
-            if (cell.querySelector('input')) return;
 
-            const currentRaw = getVal(rawData[rowIndex], 'HOD') || getVal(rawData[rowIndex], 'F DESPACHO') || '';
-            const currentDisplay = formatValue(currentRaw, 'date') || '';
-            const initialValue = convertToDateInputFormat(currentRaw);
-
-            const input = document.createElement('input');
-            input.type = 'date';
-            input.className = 'short-year';
-            input.value = initialValue;
-            input.style.cssText = 'width: 130px; padding: 2px 4px; border: 1px solid var(--primary); border-radius: 4px; font-size: 11px; outline: none;';
-
-            const span = document.createElement('span');
-            span.className = 'date-yy';
-            span.style.marginLeft = '6px';
-            span.style.cursor = 'pointer';
-
-            cell.innerHTML = '';
-            cell.appendChild(input);
-            cell.appendChild(span);
-            try { updateShortYearDisplay(input); } catch(e) {}
-
-            let finished = false;
-            const finish = (saveChanges) => {
-                if (finished) return;
-                finished = true;
-
-                if (saveChanges && input.value) {
-                    handleDateChange(input, rowIndex, 'HOD');
-                    const idxHod = findHeaderIndexCaseInsensitive('HOD');
-                    const newRaw = (idxHod !== -1 && rawData[rowIndex]) ? rawData[rowIndex][idxHod] : '';
-                    const newDisplay = formatValue(newRaw, 'date') || formatDateShortFromInput(input.value) || '';
-                    cell.setAttribute('data-value', newDisplay);
-                    cell.textContent = newDisplay;
-                } else {
-                    cell.setAttribute('data-value', currentDisplay);
-                    cell.textContent = currentDisplay;
-                }
-            };
-
-            input.addEventListener('change', () => finish(true));
-            input.addEventListener('blur', () => finish(true));
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    finish(true);
-                } else if (e.key === 'Escape') {
-                    e.preventDefault();
-                    finish(false);
-                }
-            });
-
-            span.onclick = function(e) {
-                e.stopPropagation();
-                try { input.showPicker ? input.showPicker() : input.click(); } catch(err) { input.click(); }
-            };
-
-            input.focus();
-            try { input.showPicker ? input.showPicker() : input.click(); } catch (e) {}
-        }
 
         // --- FUNCIÓN PARA EDITAR LINEA CON DOBLE CLICK ---
         function editLinea(cell, rowIndex) {
@@ -3729,80 +3592,6 @@
         }
 
         // --- FUNCIÓN PARA EDITAR OBSERVACIONES CON DOBLE CLICK ---
-        function editObservaciones(cell, rowIndex) {
-            // PROTECCIÓN: No permitir escritura en encabezados
-            if (rowIndex < 1 || !rawData[rowIndex]) {
-                console.error('PROTECCIÓN editObservaciones: rowIndex inválido=' + rowIndex);
-                return;
-            }
-            // Evitar abrir más de un editor en la misma celda
-            if (cell.querySelector('textarea')) return;
-
-            const span = cell.querySelector('.observaciones-display');
-            const currentValue = String(
-                getVal(rawData[rowIndex], 'OBSERVACIONES')
-                || getVal(rawData[rowIndex], 'OBSERVACION')
-                || getVal(rawData[rowIndex], 'OBS')
-                || ''
-            );
-
-            const textarea = document.createElement('textarea');
-            textarea.value = currentValue;
-            textarea.className = 'observaciones-input';
-            textarea.rows = 2;
-            textarea.style.cssText = 'width:100%; min-height:44px; resize:vertical; padding:4px 6px; border:1px solid var(--primary); border-radius:4px; font-size:10px; font-family:Calibri,sans-serif; outline:none; box-sizing:border-box;';
-
-            if (span) span.style.display = 'none';
-            cell.appendChild(textarea);
-            cell.style.padding = '2px';
-            textarea.focus();
-            try { textarea.setSelectionRange(textarea.value.length, textarea.value.length); } catch(e) {}
-
-            const finish = (keepChanges) => {
-                if (keepChanges) {
-                    const newValue = textarea.value.trim();
-                    if (newValue !== currentValue.trim()) {
-                        let idxObs = findHeaderIndexCaseInsensitive('OBSERVACIONES');
-                        let obsColName = 'OBSERVACIONES';
-                        if (idxObs === -1) {
-                            idxObs = findHeaderIndexCaseInsensitive('OBSERVACION');
-                            if (idxObs !== -1) obsColName = 'OBSERVACION';
-                        }
-                        if (idxObs === -1) {
-                            idxObs = findHeaderIndexCaseInsensitive('OBS');
-                            if (idxObs !== -1) obsColName = 'OBS';
-                        }
-                        if (idxObs !== -1 && rawData[rowIndex]) {
-                            rawData[rowIndex][idxObs] = newValue;
-                        }
-                        if (span) span.textContent = newValue;
-                        cell.title = newValue;
-                        updateRow(rowIndex, obsColName, newValue, null);
-                    } else if (span) {
-                        span.textContent = currentValue;
-                    }
-                } else if (span) {
-                    span.textContent = currentValue;
-                }
-
-                if (span) span.style.display = '';
-                textarea.remove();
-                cell.style.padding = '';
-            };
-
-            textarea.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    finish(true);
-                } else if (e.key === 'Escape') {
-                    e.preventDefault();
-                    finish(false);
-                }
-            });
-
-            textarea.addEventListener('blur', () => finish(true));
-        }
-
         // --- LÓGICA DE ORDENAMIENTO ---
         function sortBloqueoData(indices) {
             return indices.sort((a, b) => {
@@ -5409,7 +5198,7 @@
                     <td class="cell-pda" title="${escapeHtmlHabilitadoIngresos(prenda)}">${escapeHtmlHabilitadoIngresos(prenda)}</td>
                     <td class="cell-cert" title="${escapeHtmlHabilitadoIngresos(tipoCert)}">${escapeHtmlHabilitadoIngresos(tipoCert)}</td>
                     <td class="wrap-text col-comp-otros" style="text-align:left;" title="${escapeHtmlHabilitadoIngresos(compOtros)}">${escapeHtmlHabilitadoIngresos(compOtros)}</td>
-                    <td class="wrap-text observaciones-cell col-observaciones" style="text-align:left;" title="${escapeHtmlHabilitadoIngresos(observaciones)}" ondblclick="editObservaciones(this, ${i})"><span class="observaciones-display">${escapeHtmlHabilitadoIngresos(observaciones)}</span></td>
+                    <td class="wrap-text observaciones-cell col-observaciones" style="text-align:left;" title="${escapeHtmlHabilitadoIngresos(observaciones)}"><span class="observaciones-display">${escapeHtmlHabilitadoIngresos(observaciones)}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -6254,7 +6043,7 @@
                         || '';
                     const observacionesText = String(observacionesVal || '').trim();
                     const observacionesSafe = escapeHtml(observacionesText);
-                    const observacionesHtml = `<td class="wrap-text observaciones-cell col-observaciones" style="text-align:left;" title="${observacionesSafe}" ondblclick="editObservaciones(this, ${i})"><span class="observaciones-display">${observacionesSafe}</span></td>`;
+                    const observacionesHtml = `<td class="wrap-text observaciones-cell col-observaciones" style="text-align:left;" title="${observacionesSafe}"><span class="observaciones-display">${observacionesSafe}</span></td>`;
                     let idxValidacion = findHeaderIndexCaseInsensitive('VALIDACION');
                     if (idxValidacion === -1) idxValidacion = findHeaderIndexCaseInsensitive('VALIDA');
                     let validacionRaw = '';
@@ -6398,7 +6187,7 @@
                         <span class="linea-display">${lineaDisplay}</span>
                     </td>`;
 
-                    const hodHtml = `<td class="date-cell hod-cell" data-value="${fDesp}" ondblclick="editHodDate(this, ${i})">${fDesp}</td>`;
+                    const hodHtml = `<td class="date-cell hod-cell" data-value="${fDesp}">${fDesp}</td>`;
 
                     tr.innerHTML = `
                         <td class="p-cell">${pCell.innerHTML}</td>
