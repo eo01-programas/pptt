@@ -53,6 +53,8 @@
             border: 1px solid rgba(255,180,70,0.9);
             box-shadow: 0 2px 8px rgba(255,180,70,0.25);
             transform-origin: center;
+            /* OPTIMIZACIÓN: will-change para que el navegador use GPU para esta animación */
+            will-change: transform;
             animation: lavBadgePulse 2.2s ease-in-out infinite;
         }
         @keyframes lavBadgePulse {
@@ -2742,6 +2744,8 @@
                     rawData[0] = rawData[0].map(h => h ? h.toString().trim() : "");
                 }
 
+                _invalidateHeaderCache(); // limpiar cache de headers al recargar datos
+                _invalidateGetValCache(); // limpiar cache de getVal
                 mapColumns();
                 renderAllViews();
                 document.getElementById('loader').style.display = 'none';
@@ -3138,14 +3142,25 @@
         }
 
         // helper para buscar índice de encabezado de forma case-insensitive y sin símbolos
+        // OPTIMIZACIÓN: cache de resultados para evitar recorrer headers repetidamente
+        var _headerIndexCache = {};
+        var _headerIndexCacheVersion = 0; // se invalida al recargar datos
+        function _invalidateHeaderCache() { _headerIndexCache = {}; _headerIndexCacheVersion++; }
         function findHeaderIndexCaseInsensitive(name) {
             if (!rawData || rawData.length === 0) return -1;
+            // Revisar cache
+            var cacheKey = String(name || '');
+            if (_headerIndexCache.hasOwnProperty(cacheKey)) return _headerIndexCache[cacheKey];
             const headers = rawData[0];
             const norm = s => String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
             const target = norm(name);
             for (let i = 0; i < headers.length; i++) {
-                if (norm(headers[i]) === target) return i;
+                if (norm(headers[i]) === target) {
+                    _headerIndexCache[cacheKey] = i;
+                    return i;
+                }
             }
+            _headerIndexCache[cacheKey] = -1;
                     return -1;
                 }
 
@@ -5130,6 +5145,10 @@
 
             let lastOpPtda = null;
             let currentRowGroup = 'a';
+            // OPTIMIZACIÓN: pre-calcular idxP fuera del loop
+            const _ingIdxP = findHeaderIndexCaseInsensitive('P');
+            // OPTIMIZACIÓN: DocumentFragment para batch de inserciones
+            var _ingFragment = document.createDocumentFragment();
             filteredRows.forEach((obj) => {
                 const i = obj.idx;
                 const row = obj.row;
@@ -5144,9 +5163,8 @@
                 lastOpPtda = currentOpPtda;
                 tr.classList.add(`group-${currentRowGroup}`);
 
-                const idxP = findHeaderIndexCaseInsensitive('P');
-                if (idxP !== -1) {
-                    const pValue = String(row[idxP] || '').trim();
+                if (_ingIdxP !== -1) {
+                    const pValue = String(row[_ingIdxP] || '').trim();
                     if (pValue === '1') tr.classList.add('priority-1');
                 }
 
@@ -5200,8 +5218,10 @@
                     <td class="wrap-text col-comp-otros" style="text-align:left;" title="${escapeHtmlHabilitadoIngresos(compOtros)}">${escapeHtmlHabilitadoIngresos(compOtros)}</td>
                     <td class="wrap-text observaciones-cell col-observaciones" style="text-align:left;" title="${escapeHtmlHabilitadoIngresos(observaciones)}"><span class="observaciones-display">${escapeHtmlHabilitadoIngresos(observaciones)}</span></td>
                 `;
-                tbody.appendChild(tr);
+                _ingFragment.appendChild(tr);
             });
+            // OPTIMIZACIÓN: flush del fragment
+            tbody.appendChild(_ingFragment);
 
         }
 
@@ -5578,6 +5598,9 @@
                 return `${opTela}-${partida}`.toLowerCase();
             };
 
+            // OPTIMIZACIÓN: pre-computar índice de P fuera de los sorts y loops
+            const _sortIdxP = findHeaderIndexCaseInsensitive('P');
+
             // Ordenar índices válidos: OC, luego OP TELA+PARTIDA, luego P y HOD
             validIndices.sort((a, b) => {
                 const rowA = rawData[a];
@@ -5602,12 +5625,11 @@
                 if (cmpOpPtda !== 0) return cmpOpPtda;
                 
                 // 3. Dentro del mismo grupo, ordenar por columna P
-                const idxP = findHeaderIndexCaseInsensitive('P');
                 let pA = '';
                 let pB = '';
-                if (idxP !== -1) {
-                    pA = String(rowA[idxP] || '').trim();
-                    pB = String(rowB[idxP] || '').trim();
+                if (_sortIdxP !== -1) {
+                    pA = String(rowA[_sortIdxP] || '').trim();
+                    pB = String(rowB[_sortIdxP] || '').trim();
                 }
                 const pNumA = pA === '' ? Infinity : parseInt(pA) || Infinity;
                 const pNumB = pB === '' ? Infinity : parseInt(pB) || Infinity;
@@ -5668,12 +5690,11 @@
                     if (cmpOpPtda !== 0) return cmpOpPtda;
                     
                     // 4. Dentro del mismo grupo, ordenar por P
-                    const idxP = findHeaderIndexCaseInsensitive('P');
                     let pA = '';
                     let pB = '';
-                    if (idxP !== -1) {
-                        pA = String(rowA[idxP] || '').trim();
-                        pB = String(rowB[idxP] || '').trim();
+                    if (_sortIdxP !== -1) {
+                        pA = String(rowA[_sortIdxP] || '').trim();
+                        pB = String(rowB[_sortIdxP] || '').trim();
                     }
                     const pNumA = pA === '' ? Infinity : parseInt(pA) || Infinity;
                     const pNumB = pB === '' ? Infinity : parseInt(pB) || Infinity;
@@ -5688,6 +5709,56 @@
             
             // Procesar filas ordenadas
             let lastTrsfGroup = null;
+            // OPTIMIZACIÓN: uso de DocumentFragment para insertar todas las filas al DOM de una vez
+            var _habFragment = document.createDocumentFragment();
+            // OPTIMIZACIÓN: funciones helper movidas fuera del loop para no recrearlas por cada fila
+            const _habEscapeHtml = (txt) => String(txt || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+            const _habExtractCompText = (cellHtml) => {
+                const plain = String(cellHtml || '')
+                    .replace(/<[^>]*>/g, ' ')
+                    .replace(/&amp;/g, '&')
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                const plainNorm = plain.toUpperCase();
+                if (!plain || plain === '-' || plainNorm === 'X' || plainNorm === 'NO LLEVA') return '';
+                return plain;
+            };
+            // Pre-computar idxValidacion fuera del loop
+            let _habIdxValidacion = findHeaderIndexCaseInsensitive('VALIDACION');
+            if (_habIdxValidacion === -1) _habIdxValidacion = findHeaderIndexCaseInsensitive('VALIDA');
+
+            // OPTIMIZACIÓN: pre-computar PDS totales por grupo TRSF (evitar O(n²) dentro del forEach)
+            var _trsfGroupPds = {};
+            if (isProgSubtab) {
+                validIndices.forEach(function(idx2) {
+                    try {
+                        var r = rawData[idx2];
+                        var ev2 = '';
+                        if (idxEv !== -1 && r && r[idxEv] !== undefined) ev2 = r[idxEv];
+                        else ev2 = getVal(r, 'estado_enumerado') || '';
+                        var evNorm2 = (ev2 || '').toString().toUpperCase().trim();
+                        if (evNorm2 === 'OK ENM' || evNorm2 === 'OK S/ENM' || evNorm2 === 'OK PAQUETEO') {
+                            var habilVal2 = getVal(r, 'estado_habilitado') || '';
+                            var habilNorm2 = (habilVal2 || '').toString().toUpperCase().trim();
+                            var matchesFilter = false;
+                            if (currentHabilitadoFilter === 'PROG 1T' && habilNorm2 === 'PROG 1T') matchesFilter = true;
+                            else if (currentHabilitadoFilter === 'PROG 2T' && habilNorm2 === 'PROG 2T') matchesFilter = true;
+                            else if (currentHabilitadoFilter === 'PROG 3T' && habilNorm2 === 'PROG 3T') matchesFilter = true;
+                            if (matchesFilter) {
+                                var grp = getTrsfGroupValue(r);
+                                var pv = parseFloat(getVal(r, 'PDS GIRADAS') || 0) || 0;
+                                _trsfGroupPds[grp] = (_trsfGroupPds[grp] || 0) + pv;
+                            }
+                        }
+                    } catch(e) {}
+                });
+            }
             
             validIndices.forEach(i => {
                 const row = rawData[i];
@@ -5739,42 +5810,14 @@
                             // En PROG 1T/2T/3T se oculta F.ING -> 15 columnas
                             const colspan = isProgSubtab ? '15' : '16';
                             
-                            // Calcular suma de PDS para este grupo de TRSF
-                            let pdsTrsf = 0;
-                            try {
-                                pdsTrsf = validIndices.reduce((acc, idx2) => {
-                                    try {
-                                        const r = rawData[idx2];
-                                        let ev2 = '';
-                                        if (idxEv !== -1 && r && r[idxEv] !== undefined) ev2 = r[idxEv];
-                                        else ev2 = getVal(r, 'estado_enumerado') || '';
-                                        const evNorm2 = (ev2 || '').toString().toUpperCase().trim();
-                                        
-                                        if ((evNorm2 === 'OK ENM' || evNorm2 === 'OK S/ENM' || evNorm2 === 'OK PAQUETEO')) {
-                                            const habilVal2 = getVal(r, 'estado_habilitado') || '';
-                                            const habilNorm2 = (habilVal2 || '').toString().toUpperCase().trim();
-                                            
-                                            // Filtrar según el sub-tab actual
-                                            let matchesFilter = false;
-                                            if (currentHabilitadoFilter === 'PROG 1T' && habilNorm2 === 'PROG 1T') matchesFilter = true;
-                                            else if (currentHabilitadoFilter === 'PROG 2T' && habilNorm2 === 'PROG 2T') matchesFilter = true;
-                                            else if (currentHabilitadoFilter === 'PROG 3T' && habilNorm2 === 'PROG 3T') matchesFilter = true;
-                                            
-                                            if (matchesFilter && getTrsfGroupValue(r) === currentTrsfGroup) {
-                                                const pv = parseFloat(getVal(r, 'PDS GIRADAS') || 0) || 0;
-                                                return acc + pv;
-                                            }
-                                        }
-                                    } catch(e) {}
-                                    return acc;
-                                }, 0);
-                            } catch (e) { pdsTrsf = 0; }
+                            // OPTIMIZACIÓN: usar valores pre-computados en lugar de recalcular
+                            let pdsTrsf = _trsfGroupPds[currentTrsfGroup] || 0;
 
                             const groupLabel = currentTrsfGroup === 'Pza' ? 'LLEVA TRANSFER EN PIEZA' : 'No lleva transfer en pieza';
                             headerRow.innerHTML = `<td colspan="${colspan}" style="padding: 8px 12px; text-align: left;">
                                 <i class="ph ph-package" style="margin-right: 8px;"></i>${groupLabel} [${formatThousands(pdsTrsf,0)}pds]
                             </td>`;
-                            tbody.appendChild(headerRow);
+                            _habFragment.appendChild(headerRow);
                             
                             lastTrsfGroup = currentTrsfGroup;
                             lastOpPtda = null; // Reiniciar al cambiar de grupo
@@ -6001,23 +6044,8 @@
                             estampHtml = `<td style="text-align:center;" title="${estampVal}">${estampVal}</td>`;
                         }
                     } catch(e) { estampHtml = `<td style="text-align:center;" title="${estampVal}">${estampVal}</td>`; }
-                    const escapeHtml = (txt) => String(txt || '')
-                        .replace(/&/g, '&amp;')
-                        .replace(/</g, '&lt;')
-                        .replace(/>/g, '&gt;')
-                        .replace(/"/g, '&quot;');
-                    const extractCompText = (cellHtml) => {
-                        const plain = String(cellHtml || '')
-                            .replace(/<[^>]*>/g, ' ')
-                            .replace(/&amp;/g, '&')
-                            .replace(/&lt;/g, '<')
-                            .replace(/&gt;/g, '>')
-                            .replace(/\s+/g, ' ')
-                            .trim();
-                        const plainNorm = plain.toUpperCase();
-                        if (!plain || plain === '-' || plainNorm === 'X' || plainNorm === 'NO LLEVA') return '';
-                        return plain;
-                    };
+                    const escapeHtml = _habEscapeHtml;
+                    const extractCompText = _habExtractCompText;
                     const compItems = [];
                     const ribComp = extractCompText(ribHtml);
                     const bloqComp = extractCompText(bloqHtml);
@@ -6044,8 +6072,7 @@
                     const observacionesText = String(observacionesVal || '').trim();
                     const observacionesSafe = escapeHtml(observacionesText);
                     const observacionesHtml = `<td class="wrap-text observaciones-cell col-observaciones" style="text-align:left;" title="${observacionesSafe}"><span class="observaciones-display">${observacionesSafe}</span></td>`;
-                    let idxValidacion = findHeaderIndexCaseInsensitive('VALIDACION');
-                    if (idxValidacion === -1) idxValidacion = findHeaderIndexCaseInsensitive('VALIDA');
+                    const idxValidacion = _habIdxValidacion;
                     let validacionRaw = '';
                     if (idxValidacion !== -1 && row[idxValidacion] !== undefined && row[idxValidacion] !== null) {
                         validacionRaw = row[idxValidacion];
@@ -6225,16 +6252,17 @@
                     }
                     
                     // Si P = 1, aplicar color rojo claro y transparente
-                    const idxP = findHeaderIndexCaseInsensitive('P');
-                    if (idxP !== -1) {
-                        const pValue = String(row[idxP] || '').trim();
+                    if (_sortIdxP !== -1) {
+                        const pValue = String(row[_sortIdxP] || '').trim();
                         if (pValue === '1') {
                             tr.classList.add('priority-1');
                         }
                     }
                     
-                    tbody.appendChild(tr);
+                    _habFragment.appendChild(tr);
             });
+            // OPTIMIZACIÓN: flush del DocumentFragment al DOM (un solo reflow)
+            tbody.appendChild(_habFragment);
             try { updateMainNavCounts(); } catch (e) {}
             
             // Actualizar badges de PDS por sub-tab
@@ -6395,15 +6423,23 @@
             } catch (e) { return tipoCert; }
         }
 
+        // OPTIMIZACIÓN: cache de resolución de nombres de columna para getVal
+        var _getValCache = {};
+        function _invalidateGetValCache() { _getValCache = {}; }
         function getVal(row, colName) {
             if (!colName) return "";
+            // Revisar cache de resolución de nombre → índice
+            if (_getValCache.hasOwnProperty(colName)) {
+                var cachedIdx = _getValCache[colName];
+                if (cachedIdx !== -1) return row[cachedIdx] || "";
+                return "";
+            }
             // Try direct map first
             let idx = colMap[colName];
-            if (idx !== undefined && idx !== -1) return row[idx] || "";
+            if (idx !== undefined && idx !== -1) { _getValCache[colName] = idx; return row[idx] || ""; }
 
             // Try common variants: lower, upper, strip non-alphanum
             const variants = [
-                colName,
                 colName.toLowerCase(),
                 colName.toUpperCase(),
                 colName.replace(/[^a-zA-Z0-9]/g, ''),
@@ -6412,15 +6448,16 @@
             ];
             for (let k of variants) {
                 idx = colMap[k];
-                if (idx !== undefined && idx !== -1) return row[idx] || "";
+                if (idx !== undefined && idx !== -1) { _getValCache[colName] = idx; return row[idx] || ""; }
             }
 
             // Fallback: try to find header index dynamically
             try {
                 const found = findHeaderIndexCaseInsensitive(colName);
-                if (found !== -1) return row[found] || "";
+                if (found !== -1) { _getValCache[colName] = found; return row[found] || ""; }
             } catch (e) {}
 
+            _getValCache[colName] = -1;
             return "";
         }
 
