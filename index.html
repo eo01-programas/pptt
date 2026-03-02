@@ -140,22 +140,7 @@
             align-self: flex-start;
         }
 
-        /* Contenedor para filtros (switches) a la derecha de los sub-tabs */
-        .sub-filters {
-            margin-left: auto; display: flex; gap: 10px; align-items: center;
-        }
 
-        .filter-item { display: inline-flex; align-items: center; gap: 8px; font-weight:600; color:var(--gray-600); font-size:12px; }
-        .filter-item input[type="checkbox"] { width: 36px; height: 20px; appearance: none; -webkit-appearance:none; border-radius: 999px; background: #e5e7eb; position: relative; cursor: pointer; outline: none; transition: background 0.15s ease; }
-        .filter-item input[type="checkbox"]::before { content: ''; position: absolute; top: 3px; left: 4px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: transform 0.15s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.12); }
-        .filter-item input[type="checkbox"]:checked { background: var(--primary); }
-        .filter-item input[type="checkbox"]:checked::before { transform: translateX(16px); }
-
-        /* Reducir tamaño del switch y etiqueta 'Normal' en 40% */
-        .filter-item input#flt-normal { width: 22px; height: 12px; }
-        .filter-item input#flt-normal::before { top: 2px; left: 2px; width: 8px; height: 8px; }
-        .filter-item input#flt-normal:checked::before { transform: translateX(9px); }
-        .filter-item input#flt-normal + span { font-size: 7.2px; }
 
         .sub-tab {
             border: none; background: none; padding: 5px 12px; border-radius: 5px;
@@ -262,14 +247,15 @@
             font-weight: 600;
             color: var(--gray-600);
         }
-        .habilitado-ingresos-filters select {
-            min-width: 120px;
+        .habilitado-ingresos-filters input[type="date"] {
+            min-width: 140px;
             padding: 4px 8px;
             font-size: 12px;
             border: 1px solid var(--gray-300);
             border-radius: 6px;
             background: #fff;
             color: var(--gray-800);
+            cursor: pointer;
         }
         .habilitado-ingresos-plant-label {
             font-size: 12px;
@@ -1478,6 +1464,21 @@
         }
 
         /* Enumerado: OC completa en una linea y RIB mas delgada */
+        #view-enumerado .table-container table {
+            table-layout: fixed !important;
+            width: 100% !important;
+            min-width: 0 !important;
+        }
+        #view-enumerado .table-container thead th {
+            font-size: 9.5px !important;
+            padding: 4px 2px !important;
+            letter-spacing: 0 !important;
+        }
+        #view-enumerado .table-container tbody td {
+            font-size: 9px !important;
+            padding: 3px 2px !important;
+            line-height: 1.1 !important;
+        }
         #view-enumerado tbody td.oc-cell,
         #view-enumerado tbody td.oc-cell .oc-link,
         #view-enumerado tbody td.oc-cell span {
@@ -1486,18 +1487,31 @@
             word-break: normal !important;
             overflow: visible !important;
             text-overflow: clip !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
         }
-        #view-enumerado thead th:nth-child(11),
-        #view-enumerado tbody td:nth-child(11) {
-            width: 58px;
-            min-width: 58px;
-            max-width: 58px;
-        }
-        #view-enumerado tbody td:nth-child(11) select.table-select {
+        /* Anchos por columna Enumerado */
+        #view-enumerado .table-container thead th:nth-child(1) { width: 22px !important; }  /* P */
+        #view-enumerado .table-container thead th:nth-child(2) { width: 46px !important; }  /* HOD */
+        #view-enumerado .table-container thead th:nth-child(3) { width: 46px !important; }  /* F.ING */
+        #view-enumerado .table-container thead th:nth-child(4) { width: 32px !important; }  /* CLIENTE */
+        #view-enumerado .table-container thead th:nth-child(5) { width: 36px !important; }  /* RUTA */
+        #view-enumerado .table-container thead th:nth-child(6) { width: 76px !important; }  /* OC */
+        #view-enumerado .table-container thead th:nth-child(7) { width: 62px !important; }  /* COLOR */
+        #view-enumerado .table-container thead th:nth-child(8) { width: 32px !important; }  /* PDS */
+        #view-enumerado .table-container thead th:nth-child(9) { width: 48px !important; }  /* PRENDA */
+        #view-enumerado .table-container thead th:nth-child(10) { width: 52px !important; } /* TIPO CERT. */
+        #view-enumerado .table-container thead th:nth-child(11) { width: 48px !important; } /* RIB */
+        #view-enumerado .table-container thead th:nth-child(12) { width: 60px !important; } /* EQUIPO_CORTE */
+        #view-enumerado .table-container thead th:nth-child(13) { width: 58px !important; } /* STATUS_CORTE */
+        #view-enumerado .table-container thead th:nth-child(14) { width: 56px !important; } /* BLOQUES? */
+        #view-enumerado .table-container thead th:nth-child(15) { width: 56px !important; } /* ESTADO_ENM */
+        #view-enumerado .table-container select.table-select {
             min-width: 0 !important;
-            font-size: 10px;
-            padding-left: 4px;
-            padding-right: 14px;
+            height: 20px !important;
+            font-size: 9px !important;
+            padding: 1px 12px 1px 3px !important;
+            background-position: right 3px center !important;
         }
 
         /* Corte Pzas: compactar tabla para tablets anchas y mantener OC completa */
@@ -1658,40 +1672,7 @@
 
             .kg-badge { font-size: 10px; padding: 1px 4px; }
 
-            .sub-filters {
-                margin-left: auto;
-                gap: 4px;
-                flex-wrap: nowrap;
-                min-width: 0;
-                overflow: hidden;
-            }
 
-            .filter-item {
-                gap: 4px;
-                min-width: 0;
-                font-size: 10px;
-            }
-
-            .filter-item span {
-                font-size: 10px;
-                white-space: nowrap;
-            }
-
-            .filter-item input[type="checkbox"] {
-                width: 28px;
-                height: 16px;
-            }
-
-            .filter-item input[type="checkbox"]::before {
-                top: 2px;
-                left: 2px;
-                width: 12px;
-                height: 12px;
-            }
-
-            .filter-item input[type="checkbox"]:checked::before {
-                transform: translateX(12px);
-            }
 
             .xhabi-pill {
                 margin-left: 2px;
@@ -1760,42 +1741,155 @@
             }
 
             /* Enumerado: mantener OC visible en una sola linea tambien en tablet */
+            #view-enumerado .table-container {
+                overflow-x: hidden;
+            }
             #view-enumerado .table-container tbody td.oc-cell,
             #view-enumerado .table-container tbody td.oc-cell .oc-link,
             #view-enumerado .table-container tbody td.oc-cell span {
-                min-width: 86px !important;
+                min-width: 72px !important;
                 white-space: nowrap !important;
                 overflow-wrap: normal !important;
                 word-break: normal !important;
                 overflow: visible !important;
                 text-overflow: clip !important;
+                font-size: 10.5px !important;
+                font-weight: 600 !important;
+            }
+            #view-enumerado .table-container thead th {
+                font-size: 9px !important;
+                padding: 3px 1px !important;
+            }
+            #view-enumerado .table-container tbody td {
+                font-size: 8.5px !important;
+                padding: 2px 1px !important;
+                line-height: 1.05 !important;
+            }
+            #view-enumerado .table-container thead th:nth-child(1) { width: 18px !important; }
+            #view-enumerado .table-container thead th:nth-child(2) { width: 40px !important; }
+            #view-enumerado .table-container thead th:nth-child(3) { width: 40px !important; }
+            #view-enumerado .table-container thead th:nth-child(4) { width: 28px !important; }
+            #view-enumerado .table-container thead th:nth-child(5) { width: 32px !important; }
+            #view-enumerado .table-container thead th:nth-child(6) { width: 72px !important; }
+            #view-enumerado .table-container thead th:nth-child(7) { width: 54px !important; }
+            #view-enumerado .table-container thead th:nth-child(8) { width: 28px !important; }
+            #view-enumerado .table-container thead th:nth-child(9) { width: 42px !important; }
+            #view-enumerado .table-container thead th:nth-child(10) { width: 46px !important; }
+            #view-enumerado .table-container thead th:nth-child(11) { width: 42px !important; }
+            #view-enumerado .table-container thead th:nth-child(12) { width: 52px !important; }
+            #view-enumerado .table-container thead th:nth-child(13) { width: 50px !important; }
+            #view-enumerado .table-container thead th:nth-child(14) { width: 48px !important; }
+            #view-enumerado .table-container thead th:nth-child(15) { width: 48px !important; }
+            #view-enumerado .table-container select.table-select {
+                min-width: 0 !important;
+                height: 18px !important;
+                font-size: 8.5px !important;
+                padding: 1px 10px 1px 2px !important;
+                background-position: right 2px center !important;
             }
 
+            /* ── Habilitado: compactar tabla completa para NOVATAB 10" ── */
+            #view-habilitado .table-container {
+                overflow-x: hidden !important;
+            }
             #table-habilitado {
                 table-layout: fixed !important;
-            }
-
-            #table-habilitado th,
-            #table-habilitado td {
+                width: 100% !important;
                 min-width: 0 !important;
-                padding: 4px 3px !important;
             }
-
-            #table-habilitado th.col-comp-otros,
-            #table-habilitado td.col-comp-otros {
-                width: 12% !important;
+            #table-habilitado th {
+                font-size: 9px !important;
+                padding: 3px 2px !important;
+                letter-spacing: 0 !important;
+                min-width: 0 !important;
             }
-
-            #table-habilitado th.col-observaciones,
-            #table-habilitado td.col-observaciones {
-                width: 14% !important;
+            #table-habilitado td {
+                font-size: 8.5px !important;
+                padding: 2px 2px !important;
+                line-height: 1.1 !important;
+                min-width: 0 !important;
             }
-
-            #table-habilitado th.col-validacion,
-            #table-habilitado td.cell-validacion {
-                width: 44px !important;
-                min-width: 44px !important;
-                max-width: 44px !important;
+            /* OC: una sola línea, más grande y visible */
+            #view-habilitado #table-habilitado td.oc-cell,
+            #view-habilitado #table-habilitado td.oc-cell .oc-link,
+            #view-habilitado #table-habilitado td.oc-cell span {
+                white-space: nowrap !important;
+                overflow-wrap: normal !important;
+                word-break: normal !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
+                font-size: 10.5px !important;
+                font-weight: 600 !important;
+            }
+            /* Anchos por columna Habilitado – Por Programar / PROG */
+            #table-habilitado #th-habilitado-p { width: 20px !important; }       /* P */
+            #table-habilitado th:nth-child(2)  { width: 38px !important; }       /* HOD */
+            #table-habilitado th:nth-child(3)  { width: 38px !important; }       /* F.ING */
+            #table-habilitado th:nth-child(4)  { width: 36px !important; }       /* STATUS */
+            #table-habilitado th:nth-child(5)  { width: 26px !important; }       /* CLI */
+            #table-habilitado th:nth-child(6)  { width: 70px !important; }       /* OC */
+            /* Override base 110px min-width OC (2-ID specificity match) */
+            #view-habilitado #table-habilitado th:nth-child(6),
+            #view-habilitado #table-habilitado td.oc-cell {
+                width: 70px !important;
+                min-width: 70px !important;
+            }
+            #table-habilitado th.col-color     { width: 56px !important; min-width: 0 !important; max-width: none !important; }  /* COLOR */
+            #table-habilitado td.cell-color     { width: 56px !important; min-width: 0 !important; max-width: none !important; }
+            #table-habilitado th:nth-child(8)  { width: 28px !important; }       /* PDS */
+            #table-habilitado th.col-pda       { width: 40px !important; min-width: 0 !important; max-width: none !important; }  /* PDA */
+            #table-habilitado th.col-cert      { width: 40px !important; min-width: 0 !important; max-width: none !important; }  /* CERT */
+            #table-habilitado th.col-comp-otros      { width: 90px !important; min-width: 0 !important; max-width: none !important; }  /* COMP/OTROS */
+            #table-habilitado th.col-observaciones   { width: 110px !important; min-width: 0 !important; max-width: none !important; } /* OBSERVACIONES */
+            #table-habilitado th.col-validacion      { width: 36px !important; min-width: 36px !important; max-width: 36px !important; } /* VALIDA */
+            #table-habilitado th.col-planta    { width: 46px !important; min-width: 0 !important; max-width: none !important; }  /* PLANTA */
+            #table-habilitado th.col-linea     { width: 46px !important; min-width: 0 !important; max-width: none !important; }  /* LINEA */
+            #table-habilitado th.col-hab       { width: 46px !important; min-width: 0 !important; max-width: none !important; }  /* HAB */
+            /* Celdas td heredan ancho de th (table-layout:fixed), forzar min/max en especiales */
+            #table-habilitado td.col-comp-otros      { min-width: 0 !important; max-width: none !important; }
+            #table-habilitado td.col-observaciones   { min-width: 0 !important; max-width: none !important; }
+            #table-habilitado td.cell-validacion     { width: 36px !important; min-width: 36px !important; max-width: 36px !important; }
+            #table-habilitado td.cell-cert,
+            #table-habilitado td.cell-pda      { min-width: 0 !important; max-width: none !important; font-size: 8px !important; }
+            #table-habilitado td.cell-planta,
+            #table-habilitado td.linea-cell,
+            #table-habilitado td.cell-hab      { min-width: 0 !important; max-width: none !important; }
+            /* Selects y inputs compactos */
+            #table-habilitado select.table-select {
+                min-width: 0 !important;
+                height: 18px !important;
+                font-size: 8px !important;
+                padding: 1px 10px 1px 2px !important;
+                background-position: right 2px center !important;
+            }
+            #table-habilitado .date-yy {
+                min-width: 0 !important;
+                padding: 2px 3px !important;
+                font-size: 8.5px !important;
+            }
+            #table-habilitado td.p-cell input.prioridad-input {
+                width: 18px !important;
+                height: 18px !important;
+                font-size: 9px !important;
+            }
+            /* Ingresos mode: ajustar columnas ensanchadas */
+            #table-habilitado[data-mode="ingresos"] th.col-color,
+            #table-habilitado[data-mode="ingresos"] td.cell-color {
+                width: 72px !important;
+                min-width: 0 !important;
+                max-width: none !important;
+            }
+            #table-habilitado[data-mode="ingresos"] th.col-comp-otros,
+            #table-habilitado[data-mode="ingresos"] td.col-comp-otros {
+                width: 70px !important;
+                min-width: 0 !important;
+                max-width: none !important;
+            }
+            #table-habilitado[data-mode="ingresos"] th.col-cert,
+            #table-habilitado[data-mode="ingresos"] td.cell-cert {
+                width: 52px !important;
+                min-width: 0 !important;
+                max-width: none !important;
             }
         }
     </style>
@@ -1884,33 +1978,7 @@
         </div>
     </div>
 
-    <!-- MODAL EQ_CORTE -->
-    <div id="modal-eq-corte" class="modal-overlay" onclick="if(event.target === this) cerrarModalEQCorte()">
-        <div class="modal-content" style="width: 70%; max-width: 600px;">
-            <div class="modal-header">
-                <div>
-                    <div class="modal-title">Equipos de Corte</div>
-                    <div class="modal-subtitle">Gestionar lista de equipos</div>
-                </div>
-                <button class="modal-close" onclick="cerrarModalEQCorte()">&times;</button>
-            </div>
-            <table class="modal-table">
-                <thead>
-                    <tr>
-                        <th style="width: 30%;">EQ_Corte</th>
-                        <th style="width: 70%;">Nombre</th>
-                    </tr>
-                </thead>
-                <tbody id="modal-eq-corte-tbody">
-                    <!-- Filas dinámicas -->
-                </tbody>
-            </table>
-            <div class="modal-buttons">
-                <button class="btn-modal btn-limpiar" onclick="cerrarModalEQCorte()">Cancelar</button>
-                <button class="btn-modal btn-guardar" onclick="guardarModalEQCorte()">Guardar</button>
-            </div>
-        </div>
-    </div>
+
 
     <!-- MODAL CAMBIO EQUIPO_CORTE (DOBLE CLICK EN OC) -->
     <div id="modal-corte-oc-equipo" class="modal-overlay" onclick="if(event.target === this) cerrarModalEquipoCorteOC()">
@@ -2436,9 +2504,7 @@
                     <div id="habilitado-active-filters" style="display:none; flex-wrap:wrap; gap:6px; margin-bottom:8px; padding:4px 0;"></div>
                     <div id="habilitado-ingresos-filters" class="habilitado-ingresos-filters">
                         <label for="habilitado-ingresos-date-filter">F.ING.REAL:</label>
-                        <select id="habilitado-ingresos-date-filter" onchange="onHabilitadoIngresosDateFilterChange(this.value)">
-                            <option value="">Todos</option>
-                        </select>
+                        <input type="date" id="habilitado-ingresos-date-filter" onchange="onHabilitadoIngresosDateFilterChange(this.value)">
                         <span class="habilitado-ingresos-plant-label">PLANTA:</span>
                         <div id="habilitado-ingresos-plant-pills" class="habilitado-ingresos-plant-pills"></div>
                         <span id="habilitado-ingresos-pds-pill" class="habilitado-ingresos-pds-pill">PDS: <strong>0pds</strong></span>
@@ -2520,21 +2586,9 @@
                 <button id="corte-btn-3t" class="sub-tab" onclick="filterCorte('PROG 3T', this)">
                     PROG 3T <span class="kg-badge" id="corte-pds-3t">[-]</span>
                 </button>
-                <button id="eqcorte-btn" class="sub-tab" onclick="abrirModalEQCorte()" style="background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary);">
-                    <i class="ph ph-gear"></i> EQ_Corte
-                </button>
                 <button id="btn-nuevo-corte" class="btn-new-corte-circle" onclick="abrirModalNuevoCorte()" style="display:none;" title="Nuevo corte">
                     <i class="ph ph-plus"></i>
                 </button>
-                    <!-- Filtros por RUTA a la derecha -->
-                    <div class="sub-filters" id="corte-route-filters" style="display:flex;">
-                        <label class="filter-item"><input type="checkbox" id="flt-lv" onchange="onRouteFilterChange('LV-ok', this.checked)"><span>LV-ok</span></label>
-                        <label class="filter-item"><input type="checkbox" id="flt-ac" onchange="onRouteFilterChange('AC', this.checked)"><span>AC</span></label>
-                        <label class="filter-item"><input type="checkbox" id="flt-xl" onchange="onRouteFilterChange('x lavar', this.checked)"><span>x lavar</span></label>
-                        <label class="filter-item"><input type="checkbox" id="flt-xp" onchange="onRouteFilterChange('x pedir', this.checked)"><span>x pedir</span></label>
-                        <label class="filter-item"><input type="checkbox" id="flt-xb" onchange="onRouteFilterChange('x bloq', this.checked)"><span>x bloq</span></label>
-                        <label class="filter-item" style="display:none;"><input type="checkbox" id="flt-normal" onchange="onRouteFilterChange('NORMAL', this.checked)"><span>Normal</span></label>
-                    </div>
             </div>
             <div class="table-container">
                 <table>
@@ -3152,45 +3206,6 @@
             });
         };
 
-        // Filtros por RUTA (por defecto todos desactivados -> sin filtrado)
-        const routeFilters = {
-            'LV-ok': false,
-            'AC': false,
-            'x lavar': false,
-            'x pedir': false,
-            'x bloq': false,
-            'NORMAL': false
-        };
-
-        function onRouteFilterChange(key, checked) {
-            if (routeFilters.hasOwnProperty(key)) routeFilters[key] = !!checked;
-            // Si estamos en Corte y en el sub-tab X PROG, re-renderizar para aplicar filtros
-            try { if (document.getElementById('view-corte').classList.contains('active') && currentCorteFilter === 'X PROG') renderCorte(); } catch(e){}
-        }
-
-        // Determina la clave simple de RUTA para una fila (debe coincidir con las keys de routeFilters)
-        function getRouteKeyForRow(row) {
-            const rutaVal = getVal(row, "RUTA TELA") || getVal(row, "RUTA") || "";
-            const rutaKey = String(rutaVal || "").toUpperCase().trim();
-            // Si no hay valor en RUTA TELA/RUTA, considerarlo como NORMAL
-            if (rutaKey === '') return 'NORMAL';
-            if (rutaKey.indexOf('NORMAL') !== -1) return 'NORMAL';
-            if (rutaKey === 'ACABADA') return 'AC';
-            if (rutaKey === 'LAVADA') {
-                const estadoBloqRaw = getVal(row, "estado_bloqueo");
-                const estadoBloq = String(estadoBloqRaw || '').toUpperCase().trim();
-                const estadoLavRaw = getVal(row, "estado_lavada");
-                const estadoLav = (!estadoLavRaw || estadoLavRaw === "") ? "" : String(estadoLavRaw).toUpperCase().trim();
-
-                if (estadoBloq === '') return 'x pedir';
-                if (estadoBloq.includes('PROG')) return 'x bloq';
-                if (estadoBloq === 'OK' && (estadoLav === '' || estadoLav === 'EN LAV')) return 'x lavar';
-                if (estadoLav === 'OK') return 'LV-ok';
-                return 'LV-ok';
-            }
-            return String(rutaVal || '').trim();
-        }
-
         document.addEventListener('DOMContentLoaded', initApp);
 
         function initApp() {
@@ -3291,10 +3306,6 @@
 
                 mapColumns();
                 renderAllViews();
-                try {
-                    const eqBtn = document.getElementById('eqcorte-btn');
-                    if (eqBtn) eqBtn.style.display = (currentCorteFilter === 'X PROG') ? 'inline-flex' : 'none';
-                } catch (e) {}
                 document.getElementById('loader').style.display = 'none';
                 // Forzar un re-render breve después de ocultar el loader
                 try { setTimeout(function(){ try { renderArtes(); } catch(e) {} }, 200); } catch(e) {}
@@ -5293,19 +5304,10 @@
                 const estadoCorteNorm = (!estadoCorteVal || estadoCorteVal === '') ? 'X PROG' : String(estadoCorteVal);
 
                 if (!isCorteOk && estadoCorteNorm === currentCorteFilter) {
-                    // Si estamos en el sub-tab 'X PROG' y hay filtros por RUTA activos,
-                    // aplicar filtrado: incluir la fila solo si su clave RUTA coincide
+                    // En X PROG: excluir filas cuyo CORTE (parte base antes de '-')
+                    // sea numérico y mayor o igual a 9000
                     try {
                         if (currentCorteFilter === 'X PROG') {
-                            const anyChecked = Object.values(routeFilters).some(v => v);
-                            if (anyChecked) {
-                                const routeKey = getRouteKeyForRow(row);
-                                if (!routeFilters.hasOwnProperty(routeKey) || !routeFilters[routeKey]) {
-                                    continue; // no coincide con filtros activos
-                                }
-                            }
-                            // Además: excluir filas cuyo CORTE (parte base antes de '-')
-                            // sea numérico y mayor o igual a 9000 cuando estamos en X PROG
                             try {
                                 const corteRaw = String(row[colMap["CORTE"]] || '').trim();
                                 const corteBase = parseInt((corteRaw.split('-')[0] || '').trim());
@@ -6403,56 +6405,31 @@
         }
 
         function renderHabilitadoIngresosDateOptions(rowsOk) {
-            const select = document.getElementById('habilitado-ingresos-date-filter');
-            if (!select) return;
+            const input = document.getElementById('habilitado-ingresos-date-filter');
+            if (!input) return;
 
-            const byKey = new Map();
-            let hasEmpty = false;
-
+            // Encontrar la fecha más reciente en los datos
+            let latestDate = null;
             rowsOk.forEach(obj => {
                 const row = obj.row || obj;
                 const rawFIngReal = getRawFIngRealFromRow(row);
-                const key = getFIngRealDayMonthKey(rawFIngReal);
-                const label = getFIngRealDayMonthLabel(rawFIngReal);
-                if (key && label) {
-                    if (!byKey.has(key)) byKey.set(key, label);
-                } else {
-                    hasEmpty = true;
+                const dt = parseDateFromAnyHabilitado(rawFIngReal);
+                if (dt && !isNaN(dt.getTime())) {
+                    if (!latestDate || dt.getTime() > latestDate.getTime()) {
+                        latestDate = dt;
+                    }
                 }
             });
 
-            const sorted = Array.from(byKey.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-
-            // Filtro por defecto: ayer (dd/mmm) cuando el usuario aún no eligió uno.
-            if (!habilitadoIngresosDateFilter) {
-                const yesterday = new Date();
-                yesterday.setDate(yesterday.getDate() - 1);
-                const yesterdayLabel = formatDayMonthEsFromDate(yesterday);
-                const hasYesterday = sorted.some((entry) => entry[1] === yesterdayLabel);
-                if (hasYesterday) habilitadoIngresosDateFilter = yesterdayLabel;
+            // Por defecto: la última fecha con registro
+            if (!habilitadoIngresosDateFilter && latestDate) {
+                const yyyy = latestDate.getFullYear();
+                const mm = String(latestDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(latestDate.getDate()).padStart(2, '0');
+                habilitadoIngresosDateFilter = `${yyyy}-${mm}-${dd}`;
             }
 
-            if (habilitadoIngresosDateFilter === '__EMPTY__' && !hasEmpty) {
-                habilitadoIngresosDateFilter = '';
-            }
-            if (habilitadoIngresosDateFilter && habilitadoIngresosDateFilter !== '__EMPTY__') {
-                const exists = sorted.some((entry) => entry[1] === habilitadoIngresosDateFilter);
-                if (!exists) habilitadoIngresosDateFilter = '';
-            }
-
-            let html = '<option value="">Todos</option>';
-            sorted.forEach((entry) => {
-                const label = entry[1];
-                const selected = (habilitadoIngresosDateFilter === label) ? ' selected' : '';
-                html += `<option value="${escapeHtmlHabilitadoIngresos(label)}"${selected}>${escapeHtmlHabilitadoIngresos(label)}</option>`;
-            });
-            if (hasEmpty) {
-                const selected = (habilitadoIngresosDateFilter === '__EMPTY__') ? ' selected' : '';
-                html += `<option value="__EMPTY__"${selected}>VACIO</option>`;
-            }
-
-            select.innerHTML = html;
-            if (!habilitadoIngresosDateFilter) select.value = '';
+            input.value = habilitadoIngresosDateFilter || '';
         }
 
         function getHabilitadoIngresosPlantValue(row) {
@@ -6556,9 +6533,13 @@
             const rowsAfterDateFilter = rowsOk.filter((obj) => {
                 if (!habilitadoIngresosDateFilter) return true;
                 const rawFIngReal = getRawFIngRealFromRow(obj.row);
-                const label = getFIngRealDayMonthLabel(rawFIngReal);
-                if (habilitadoIngresosDateFilter === '__EMPTY__') return !label;
-                return label === habilitadoIngresosDateFilter;
+                const dt = parseDateFromAnyHabilitado(rawFIngReal);
+                if (!dt || isNaN(dt.getTime())) return false;
+                const yyyy = dt.getFullYear();
+                const mm = String(dt.getMonth() + 1).padStart(2, '0');
+                const dd = String(dt.getDate()).padStart(2, '0');
+                const rowDateStr = `${yyyy}-${mm}-${dd}`;
+                return rowDateStr === habilitadoIngresosDateFilter;
             });
 
             renderHabilitadoIngresosPlantPills(rowsAfterDateFilter);
@@ -11285,16 +11266,7 @@
             document.querySelectorAll('#view-corte .sub-tab').forEach(el => el.classList.remove('active'));
             btn.classList.add('active');
             corteHeaderFilter = null; // Limpiar filtro al cambiar de sub-tab
-                    // Mostrar/ocultar filtros por RUTA solo cuando estemos en 'Por Programar' (X PROG)
-                    try {
-                        const filtEl = document.getElementById('corte-route-filters');
-                        if (filtEl) filtEl.style.display = (filterState === 'X PROG') ? 'flex' : 'none';
-                    } catch (e) {}
-                    // Mostrar/ocultar botón EQ_Corte solo cuando estemos en 'Por Programar' (X PROG)
-                    try {
-                        const eqBtn = document.getElementById('eqcorte-btn');
-                        if (eqBtn) eqBtn.style.display = (filterState === 'X PROG') ? 'inline-flex' : 'none';
-                    } catch (e) {}
+
                     // Mostrar/ocultar boton "Nuevo corte" solo en sub-tabs PROG 1T/2T/3T
                     try {
                         const btnNuevoCorte = document.getElementById('btn-nuevo-corte');
@@ -14337,15 +14309,10 @@
         };
 
         // ===============================
-        // FUNCIONES DEL MODAL EQ_CORTE
+        // DATOS EQ_CORTE (para select de equipos)
         // ===============================
 
         let equiposCorteData = [];
-
-        window.abrirModalEQCorte = function() {
-            // Cargar datos de la hoja EQ_Corte
-            cargarEquiposCorte();
-        };
 
         function cargarEquiposCorteBackground() {
             // Cargar equipos sin mostrar el modal (para uso en select)
@@ -14360,11 +14327,6 @@
         }
 
         function cargarEquiposCorte() {
-            // Mostrar loading en modal
-            document.getElementById('modal-eq-corte-tbody').innerHTML = '<tr><td colspan="2" style="text-align:center;padding:20px;">Cargando equipos...</td></tr>';
-            document.getElementById('modal-eq-corte').classList.add('active');
-
-            // Usar el mismo método que funciona para los datos principales
             const script = document.createElement('script');
             script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=responseHandler:loadEQCorteCallback&sheet=EQ_Corte`;
             script.onerror = () => {
@@ -14374,7 +14336,6 @@
                     {eq: 1, nombre: "Mesa 1"},
                     {eq: 2, nombre: "Mesa 2"}
                 ];
-                renderModalEQCorte();
             };
             document.body.appendChild(script);
         }
@@ -14414,8 +14375,6 @@
                     ];
                 }
                 
-                renderModalEQCorte();
-                
             } catch (error) {
                 console.error("Error procesando datos EQ_Corte:", error);
                 // Datos por defecto en caso de error
@@ -14423,76 +14382,6 @@
                     {eq: 1, nombre: "Mesa 1"},
                     {eq: 2, nombre: "Mesa 2"}
                 ];
-                renderModalEQCorte();
-            }
-        };
-
-        function renderModalEQCorte() {
-            const tbody = document.getElementById('modal-eq-corte-tbody');
-            let html = '';
-            
-            equiposCorteData.forEach((equipo, index) => {
-                const isLast = (index === equiposCorteData.length - 1);
-                const btnHTML = isLast ? '<button class="btn-tendido" onclick="agregarEquipoCorte()" style="margin-right: 6px;" title="Agregar equipo">+</button>' : '';
-                html += `
-                    <tr>
-                        <td style="text-align: center; font-weight: 600;">${btnHTML}${equipo.eq}</td>
-                        <td><input type="text" value="${equipo.nombre}" onchange="equiposCorteData[${index}].nombre = this.value" style="width: 100%; padding: 6px; border: 1px solid var(--gray-300); border-radius: 4px;"></td>
-                    </tr>
-                `;
-            });
-            
-            tbody.innerHTML = html;
-        }
-
-        window.agregarEquipoCorte = function() {
-            // Calcular el siguiente número EQ basado en los datos existentes
-            let nextEQ = 1;
-            if (equiposCorteData.length > 0) {
-                const maxEQ = Math.max(...equiposCorteData.map(e => parseInt(e.eq) || 0));
-                nextEQ = maxEQ + 1;
-            }
-            
-            equiposCorteData.push({
-                eq: nextEQ,
-                nombre: `Equipo ${nextEQ}`
-            });
-            renderModalEQCorte();
-        };
-
-        window.cerrarModalEQCorte = function() {
-            document.getElementById('modal-eq-corte').classList.remove('active');
-        };
-
-        window.guardarModalEQCorte = function() {
-            // Validar que todos los nombres estén completos
-            const nombresVacios = equiposCorteData.some(e => !e.nombre || e.nombre.trim() === '');
-            if (nombresVacios) {
-                alert('Por favor complete todos los nombres de equipos.');
-                return;
-            }
-
-            try {
-                // Enviar cada equipo al backend
-                equiposCorteData.forEach((equipo, index) => {
-                    fetch(WEB_APP_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        body: JSON.stringify({
-                            action: "updateEQCorte",
-                            eq: equipo.eq,
-                            nombre: equipo.nombre,
-                            row: index + 1 // +1 para header
-                        })
-                    }).catch(e => console.error(`Error guardando equipo ${equipo.eq}`, e));
-                });
-
-                alert(`Se han guardado ${equiposCorteData.length} equipos de corte.`);
-                cerrarModalEQCorte();
-                
-            } catch (e) {
-                console.error('Error guardando equipos:', e);
-                alert('Error al guardar los equipos.');
             }
         };
 
@@ -14657,7 +14546,3 @@
 
     </body>
     </html>
-
-
-
-
